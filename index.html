@@ -1,340 +1,380 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Runora Converter</title>
-    <!-- Import Google Font -->
-    <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
-    <style>
-        /* Base Styles */
-        body {
-            font-family: 'Arial', sans-serif;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            flex-direction: column;
-            background-color: #f4f4f9;
-            color: #333;
-            transition: background-color 0.3s ease, color 0.3s ease;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Runora Converter</title>
+<!-- Import Google Font -->
+<link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
+<style>
+    /* Base Styles */
+    body {
+        font-family: 'Arial', sans-serif;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        flex-direction: column;
+        background-color: #f4f4f9;
+        color: #333;
+        transition: background-color 0.3s ease, color 0.3s ease;
+    }
 
-        /* Title Styles */
-        h1 {
-            margin: 20px 0;
-            font-size: 3.5rem;
-            font-family: 'Patrick Hand', cursive;
-            font-weight: 400;
-            text-align: center;
-            animation: colorChange 5s infinite;
-        }
+    /* Title Styles */
+    h1 {
+        margin: 20px 0;
+        font-size: 3.5rem;
+        font-family: 'Patrick Hand', cursive;
+        font-weight: 400;
+        text-align: center;
+        animation: colorChange 5s infinite;
+    }
 
-        /* Textarea Styles */
-        textarea {
-            width: 300px;
-            height: 100px;
-            padding: 10px;
-            font-size: 16px;
-            border: 2px solid #6200ea;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            resize: none;
-            transition: border-color 0.3s ease, background-color 0.3s ease, color 0.3s ease;
-        }
+    /* Textarea Styles */
+    textarea {
+        width: 300px;
+        height: 100px;
+        padding: 10px;
+        font-size: 16px;
+        border: 2px solid #6200ea;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        resize: none;
+        transition: border-color 0.3s ease, background-color 0.3s ease, color 0.3s ease;
+    }
 
-        /* Button Styles */
-        button {
-            background-color: #6200ea;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            font-size: 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-        button:hover {
-            opacity: 0.9;
-        }
+    /* Button Styles */
+    button {
+        background-color: #6200ea;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        font-size: 16px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        margin: 5px; /* Added margin for spacing */
+    }
+    button:hover {
+        opacity: 0.9;
+    }
 
-        /* Output Text Styles */
-        #outputText {
-            margin-top: 20px;
-            padding: 10px;
-            width: 300px;
-            min-height: 50px;
-            background-color: #fff;
-            border: 2px solid #6200ea;
-            border-radius: 8px;
-            font-size: 16px;
-            word-wrap: break-word;
-            transition: border-color 0.3s ease, background-color 0.3s ease, color 0.3s ease;
-        }
+    /* Output Text Styles */
+    #outputText {
+        margin-top: 20px;
+        padding: 10px;
+        width: 300px;
+        min-height: 50px;
+        background-color: #fff;
+        border: 2px solid #6200ea;
+        border-radius: 8px;
+        font-size: 16px;
+        word-wrap: break-word;
+        transition: border-color 0.3s ease, background-color 0.3s ease, color 0.3s ease;
+    }
 
-        /* Theme Buttons */
-        .theme-buttons {
-            margin-top: 20px;
-        }
-        .theme-buttons button {
-            margin: 5px;
-            padding: 8px 16px;
-            font-size: 14px;
-            border-radius: 5px;
-        }
+    /* Theme Buttons */
+    .theme-buttons {
+        margin-top: 20px;
+    }
+    .theme-buttons button {
+        margin: 5px;
+        padding: 8px 16px;
+        font-size: 14px;
+        border-radius: 5px;
+    }
 
-        /* Modal Styles */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-            z-index: 1000;
-        }
-        .modal h2 {
-            margin-top: 0;
-        }
-        .modal label {
-            display: block;
-            margin: 10px 0 5px;
-        }
-        .modal input[type="color"] {
-            width: 100%;
-            padding: 5px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-        }
-        .modal button {
-            margin-top: 10px;
-            width: 100%;
-        }
-        .overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 999;
-        }
+    /* Modal Styles */
+    .modal {
+        display: none;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        z-index: 1000;
+    }
+    .modal h2 {
+        margin-top: 0;
+    }
+    .modal label {
+        display: block;
+        margin: 10px 0 5px;
+    }
+    .modal input[type="color"] {
+        width: 100%;
+        padding: 5px;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+    }
+    .modal button {
+        margin-top: 10px;
+        width: 100%;
+    }
+    .overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 999;
+    }
 
-        /* Keyframes for color-changing animation */
-        @keyframes colorChange {
-            0% { color: #6200ea; }
-            25% { color: #bb86fc; }
-            50% { color: #03dac6; }
-            75% { color: #ff0266; }
-            100% { color: #6200ea; }
-        }
-    </style>
+    /* Keyframes for color-changing animation */
+    @keyframes colorChange {
+        0% { color: #6200ea; }
+        25% { color: #bb86fc; }
+        50% { color: #03dac6; }
+        75% { color: #ff0266; }
+        100% { color: #6200ea; }
+    }
+</style>
 </head>
 <body>
-    <h1>Runora Converter</h1>
-    <textarea id="inputText" rows="4" cols="50" placeholder="Enter text here..."></textarea>
-    <br>
-    <button onclick="convertText()">Convert</button>
-    <h2>Converted Text:</h2>
-    <p id="outputText"></p>
+<h1>Runora Converter</h1>
+<textarea id="inputText" rows="4" cols="50" placeholder="Enter text here..."></textarea>
+<br>
+<button onclick="convertText()">Convert</button>
+<button onclick="toggleConversion()" id="toggleButton">Switch to Symbols to Alphabet</button>
+<button onclick="copyOutput()">Copy Converted Text</button>
+<h2>Converted Text:</h2>
+<p id="outputText"></p>
 
-    <!-- Theme Buttons -->
-    <div class="theme-buttons">
-        <button onclick="setTheme('light')">Light Theme</button>
-        <button onclick="setTheme('dark')">Dark Theme</button>
-        <button onclick="openCustomThemeModal()">Custom Theme</button>
-    </div>
+<!-- Theme Buttons -->
+<div class="theme-buttons">
+    <button onclick="setTheme('light')">Light Theme</button>
+    <button onclick="setTheme('dark')">Dark Theme</button>
+    <button onclick="openCustomThemeModal()">Custom Theme</button>
+</div>
 
-    <!-- Custom Theme Modal -->
-    <div class="overlay" id="overlay"></div>
-    <div class="modal" id="customThemeModal">
-        <h2>Customize Theme</h2>
-        <label for="bgColor">Background Color:</label>
-        <input type="color" id="bgColor" value="#f4f4f9">
-        <label for="textColor">Text Color:</label>
-        <input type="color" id="textColor" value="#333">
-        <label for="textareaBgColor">Textarea Background:</label>
-        <input type="color" id="textareaBgColor" value="#ffffff">
-        <label for="textareaBorderColor">Textarea Border:</label>
-        <input type="color" id="textareaBorderColor" value="#6200ea">
-        <label for="buttonBgColor">Button Background:</label>
-        <input type="color" id="buttonBgColor" value="#6200ea">
-        <label for="buttonTextColor">Button Text:</label>
-        <input type="color" id="buttonTextColor" value="#ffffff">
-        <button onclick="applyCustomTheme()">Apply Theme</button>
-    </div>
+<!-- Custom Theme Modal -->
+<div class="overlay" id="overlay"></div>
+<div class="modal" id="customThemeModal">
+    <h2>Customize Theme</h2>
+    <label for="bgColor">Background Color:</label>
+    <input type="color" id="bgColor" value="#f4f4f9">
+    <label for="textColor">Text Color:</label>
+    <input type="color" id="textColor" value="#333">
+    <label for="textareaBgColor">Textarea Background:</label>
+    <input type="color" id="textareaBgColor" value="#ffffff">
+    <label for="textareaBorderColor">Textarea Border:</label>
+    <input type="color" id="textareaBorderColor" value="#6200ea">
+    <label for="buttonBgColor">Button Background:</label>
+    <input type="color" id="buttonBgColor" value="#6200ea">
+    <label for="buttonTextColor">Button Text:</label>
+    <input type="color" id="buttonTextColor" value="#ffffff">
+    <button onclick="applyCustomTheme()">Apply Theme</button>
+</div>
 
-    <script>
-        // Define the mapping between letters and symbols
-        const symbolMap = {
-            'A': '∣',
-            'B': '‒',
-            'C': 'ˁ',
-            'D': '●',
-            'E': '⋋',
-            'F': '⋌',
-            'G': '≺',
-            'H': '⋏',
-            'I': '≖',
-            'J': '≻',
-            'K': '⊼',
-            'L': '∦',
-            'M': '⋂',
-            'N': '⋃',
-            'O': '∅',
-            'P': 'π',
-            'Q': '∀',
-            'R': '∈',
-            'S': '∼',
-            'T': 'T',
-            'U': '∃',
-            'V': '⋎',
-            'W': 'ω',
-            'X': 'X',
-            'Y': 'Y',
-            'Z': 'Ω'
-        };
+<script>
+    // Define the mapping between letters and symbols
+    const symbolMap = {
+        'A': '∣',
+        'B': '‒',
+        'C': 'ˁ',
+        'D': '●',
+        'E': '⋋',
+        'F': '⋌',
+        'G': '≺',
+        'H': '⋏',
+        'I': '≖',
+        'J': '≻',
+        'K': '⊼',
+        'L': '∦',
+        'M': '⋂',
+        'N': '⋃',
+        'O': '∅',
+        'P': '∸', // Updated symbol for P
+        'Q': '∀',
+        'R': '∈',
+        'S': '∼',
+        'T': 'T',
+        'U': '∃',
+        'V': '⋎',
+        'W': 'ω',
+        'X': 'X',
+        'Y': 'Y',
+        'Z': 'Ω'
+    };
 
-        // Function to convert text
-        function convertText() {
-            const inputText = document.getElementById('inputText').value.toUpperCase();
-            let outputText = '';
+    // Create a reverse mapping for symbols to letters
+    const reverseSymbolMap = {};
+    for (const [key, value] of Object.entries(symbolMap)) {
+        reverseSymbolMap[value] = key;
+    }
 
+    let conversionType = 'alphabetToSymbol'; // Default conversion type
+
+    // Function to toggle conversion type
+    function toggleConversion() {
+        conversionType = conversionType === 'alphabetToSymbol' ? 'symbolToAlphabet' : 'alphabetToSymbol';
+        const toggleButton = document.getElementById('toggleButton');
+        toggleButton.textContent = conversionType === 'alphabetToSymbol' 
+            ? 'Switch to Symbols to Alphabet' 
+            : 'Switch to Alphabet to Symbols';
+    }
+
+    // Function to convert text
+    function convertText() {
+        const inputText = document.getElementById('inputText').value.toUpperCase();
+        let outputText = '';
+
+        if (conversionType === 'alphabetToSymbol') {
             for (let char of inputText) {
                 outputText += symbolMap[char] || char; // Use the symbol if available, else keep the original character
             }
-
-            document.getElementById('outputText').innerText = outputText;
-        }
-
-        // Function to set the theme
-        function setTheme(theme) {
-            const body = document.body;
-            const textarea = document.getElementById('inputText');
-            const outputText = document.getElementById('outputText');
-            const buttons = document.querySelectorAll('button');
-
-            if (theme === 'light') {
-                body.style.backgroundColor = '#f4f4f9';
-                body.style.color = '#333';
-                textarea.style.backgroundColor = '#fff';
-                textarea.style.color = '#333';
-                textarea.style.borderColor = '#6200ea';
-                outputText.style.backgroundColor = '#fff';
-                outputText.style.color = '#333';
-                outputText.style.borderColor = '#6200ea';
-                buttons.forEach(button => {
-                    button.style.backgroundColor = '#6200ea';
-                    button.style.color = '#fff';
-                });
-            } else if (theme === 'dark') {
-                body.style.backgroundColor = '#333';
-                body.style.color = '#f4f4f9';
-                textarea.style.backgroundColor = '#444';
-                textarea.style.color = '#f4f4f9';
-                textarea.style.borderColor = '#bb86fc';
-                outputText.style.backgroundColor = '#444';
-                outputText.style.color = '#f4f4f9';
-                outputText.style.borderColor = '#bb86fc';
-                buttons.forEach(button => {
-                    button.style.backgroundColor = '#bb86fc';
-                    button.style.color = '#333';
-                });
+        } else {
+            for (let char of inputText) {
+                outputText += reverseSymbolMap[char] || char; // Use the letter if available, else keep the original character
             }
-
-            // Save the selected theme to localStorage
-            localStorage.setItem('theme', theme);
         }
 
-        // Function to open the custom theme modal
-        function openCustomThemeModal() {
-            document.getElementById('customThemeModal').style.display = 'block';
-            document.getElementById('overlay').style.display = 'block';
-        }
+        document.getElementById('outputText').innerText = outputText;
+    }
 
-        // Function to apply the custom theme
-        function applyCustomTheme() {
-            const body = document.body;
-            const textarea = document.getElementById('inputText');
-            const outputText = document.getElementById('outputText');
-            const buttons = document.querySelectorAll('button');
-
-            // Get custom colors
-            const bgColor = document.getElementById('bgColor').value;
-            const textColor = document.getElementById('textColor').value;
-            const textareaBgColor = document.getElementById('textareaBgColor').value;
-            const textareaBorderColor = document.getElementById('textareaBorderColor').value;
-            const buttonBgColor = document.getElementById('buttonBgColor').value;
-            const buttonTextColor = document.getElementById('buttonTextColor').value;
-
-            // Apply custom colors
-            body.style.backgroundColor = bgColor;
-            body.style.color = textColor;
-            textarea.style.backgroundColor = textareaBgColor;
-            textarea.style.color = textColor;
-            textarea.style.borderColor = textareaBorderColor;
-            outputText.style.backgroundColor = textareaBgColor;
-            outputText.style.color = textColor;
-            outputText.style.borderColor = textareaBorderColor;
-            buttons.forEach(button => {
-                button.style.backgroundColor = buttonBgColor;
-                button.style.color = buttonTextColor;
+    // Function to copy the converted text
+    function copyOutput() {
+        const outputText = document.getElementById('outputText').innerText;
+        if (outputText) {
+            navigator.clipboard.writeText(outputText).then(() => {
+                alert('Converted text copied to clipboard!');
+            }).catch(() => {
+                alert('Failed to copy text. Please ensure your browser supports clipboard access.');
             });
+        } else {
+            alert('No converted text to copy.');
+        }
+    }
 
-            // Save custom theme to localStorage
-            const customTheme = {
-                bgColor,
-                textColor,
-                textareaBgColor,
-                textareaBorderColor,
-                buttonBgColor,
-                buttonTextColor
-            };
-            localStorage.setItem('theme', 'custom');
-            localStorage.setItem('customTheme', JSON.stringify(customTheme));
+    // Function to set the theme
+    function setTheme(theme) {
+        const body = document.body;
+        const textarea = document.getElementById('inputText');
+        const outputText = document.getElementById('outputText');
+        const buttons = document.querySelectorAll('button');
 
-            // Close the modal
-            document.getElementById('customThemeModal').style.display = 'none';
-            document.getElementById('overlay').style.display = 'none';
+        if (theme === 'light') {
+            body.style.backgroundColor = '#f4f4f9';
+            body.style.color = '#333';
+            textarea.style.backgroundColor = '#fff';
+            textarea.style.color = '#333';
+            textarea.style.borderColor = '#6200ea';
+            outputText.style.backgroundColor = '#fff';
+            outputText.style.color = '#333';
+            outputText.style.borderColor = '#6200ea';
+            buttons.forEach(button => {
+                button.style.backgroundColor = '#6200ea';
+                button.style.color = '#fff';
+            });
+        } else if (theme === 'dark') {
+            body.style.backgroundColor = '#333';
+            body.style.color = '#f4f4f9';
+            textarea.style.backgroundColor = '#444';
+            textarea.style.color = '#f4f4f9';
+            textarea.style.borderColor = '#bb86fc';
+            outputText.style.backgroundColor = '#444';
+            outputText.style.color = '#f4f4f9';
+            outputText.style.borderColor = '#bb86fc';
+            buttons.forEach(button => {
+                button.style.backgroundColor = '#bb86fc';
+                button.style.color = '#333';
+            });
         }
 
-        // Function to load the saved theme
-        function loadTheme() {
-            const savedTheme = localStorage.getItem('theme');
-            if (savedTheme === 'light' || savedTheme === 'dark') {
-                setTheme(savedTheme);
-            } else if (savedTheme === 'custom') {
-                const customTheme = JSON.parse(localStorage.getItem('customTheme'));
-                if (customTheme) {
-                    const body = document.body;
-                    const textarea = document.getElementById('inputText');
-                    const outputText = document.getElementById('outputText');
-                    const buttons = document.querySelectorAll('button');
+        // Save the selected theme to localStorage
+        localStorage.setItem('theme', theme);
+    }
 
-                    body.style.backgroundColor = customTheme.bgColor;
-                    body.style.color = customTheme.textColor;
-                    textarea.style.backgroundColor = customTheme.textareaBgColor;
-                    textarea.style.color = customTheme.textColor;
-                    textarea.style.borderColor = customTheme.textareaBorderColor;
-                    outputText.style.backgroundColor = customTheme.textareaBgColor;
-                    outputText.style.color = customTheme.textColor;
-                    outputText.style.borderColor = customTheme.textareaBorderColor;
-                    buttons.forEach(button => {
-                        button.style.backgroundColor = customTheme.buttonBgColor;
-                        button.style.color = customTheme.buttonTextColor;
-                    });
-                }
+    // Function to open the custom theme modal
+    function openCustomThemeModal() {
+        document.getElementById('customThemeModal').style.display = 'block';
+        document.getElementById('overlay').style.display = 'block';
+    }
+
+    // Function to apply the custom theme
+    function applyCustomTheme() {
+        const body = document.body;
+        const textarea = document.getElementById('inputText');
+        const outputText = document.getElementById('outputText');
+        const buttons = document.querySelectorAll('button');
+
+        // Get custom colors
+        const bgColor = document.getElementById('bgColor').value;
+        const textColor = document.getElementById('textColor').value;
+        const textareaBgColor = document.getElementById('textareaBgColor').value;
+        const textareaBorderColor = document.getElementById('textareaBorderColor').value;
+        const buttonBgColor = document.getElementById('buttonBgColor').value;
+        const buttonTextColor = document.getElementById('buttonTextColor').value;
+
+        // Apply custom colors
+        body.style.backgroundColor = bgColor;
+        body.style.color = textColor;
+        textarea.style.backgroundColor = textareaBgColor;
+        textarea.style.color = textColor;
+        textarea.style.borderColor = textareaBorderColor;
+        outputText.style.backgroundColor = textareaBgColor;
+        outputText.style.color = textColor;
+        outputText.style.borderColor = textareaBorderColor;
+        buttons.forEach(button => {
+            button.style.backgroundColor = buttonBgColor;
+            button.style.color = buttonTextColor;
+        });
+
+        // Save custom theme to localStorage
+        const customTheme = {
+            bgColor,
+            textColor,
+            textareaBgColor,
+            textareaBorderColor,
+            buttonBgColor,
+            buttonTextColor
+        };
+        localStorage.setItem('theme', 'custom');
+        localStorage.setItem('customTheme', JSON.stringify(customTheme));
+
+        // Close the modal
+        document.getElementById('customThemeModal').style.display = 'none';
+        document.getElementById('overlay').style.display = 'none';
+    }
+
+    // Function to load the saved theme
+    function loadTheme() {
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'light' || savedTheme === 'dark') {
+            setTheme(savedTheme);
+        } else if (savedTheme === 'custom') {
+            const customTheme = JSON.parse(localStorage.getItem('customTheme'));
+            if (customTheme) {
+                const body = document.body;
+                const textarea = document.getElementById('inputText');
+                const outputText = document.getElementById('outputText');
+                const buttons = document.querySelectorAll('button');
+
+                body.style.backgroundColor = customTheme.bgColor;
+                body.style.color = customTheme.textColor;
+                textarea.style.backgroundColor = customTheme.textareaBgColor;
+                textarea.style.color = customTheme.textColor;
+                textarea.style.borderColor = customTheme.textareaBorderColor;
+                outputText.style.backgroundColor = customTheme.textareaBgColor;
+                outputText.style.color = customTheme.textColor;
+                outputText.style.borderColor = customTheme.textareaBorderColor;
+                buttons.forEach(button => {
+                    button.style.backgroundColor = customTheme.buttonBgColor;
+                    button.style.color = customTheme.buttonTextColor;
+                });
             }
         }
+    }
 
-        // Load the saved theme when the page loads
-        window.onload = loadTheme;
-    </script>
+    // Load the saved theme when the page loads
+    window.onload = loadTheme;
+</script>
 </body>
 </html>
