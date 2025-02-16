@@ -199,10 +199,10 @@
         'T': 'T',
         'U': '∃',
         'V': '⋎',
-        'W': 'ω',
+        'W': 'w', // Corrected symbol for W
         'X': 'X',
         'Y': 'Y',
-        'Z': 'Ω'
+        'Z': 'Ω'  // Corrected symbol for Z
     };
 
     // Create a reverse mapping for symbols to letters
@@ -211,6 +211,14 @@
         reverseSymbolMap[value] = key;
     }
 
+    // Explicitly map ω to W and Ω to Z
+    reverseSymbolMap['ω'] = 'W'; // Ensure ω maps to W
+    reverseSymbolMap['Ω'] = 'Z'; // Ensure Ω maps to Z
+
+    // Debugging: Log the symbolMap and reverseSymbolMap
+    console.log('Symbol Map:', symbolMap);
+    console.log('Reverse Symbol Map:', reverseSymbolMap);
+
     let conversionType = 'alphabetToSymbol'; // Default conversion type
 
     // Function to toggle conversion type
@@ -218,8 +226,9 @@
         conversionType = conversionType === 'alphabetToSymbol' ? 'symbolToAlphabet' : 'alphabetToSymbol';
         const toggleButton = document.getElementById('toggleButton');
         toggleButton.textContent = conversionType === 'alphabetToSymbol' 
-            ? 'Switch to Runora/Alphabet' 
-            : 'Switch to Alphabet/Runora';
+            ? 'Switch to Symbols to Alphabet' 
+            : 'Switch to Alphabet to Symbols';
+        console.log('Conversion type toggled to:', conversionType);
     }
 
     // Function to convert text
@@ -227,16 +236,24 @@
         const inputText = document.getElementById('inputText').value.toUpperCase();
         let outputText = '';
 
+        console.log('Input Text:', inputText);
+        console.log('Conversion Type:', conversionType);
+
         if (conversionType === 'alphabetToSymbol') {
             for (let char of inputText) {
-                outputText += symbolMap[char] || char; // Use the symbol if available, else keep the original character
+                const symbol = symbolMap[char] || char; // Use the symbol if available, else keep the original character
+                outputText += symbol;
+                console.log(`Character: ${char} -> Symbol: ${symbol}`);
             }
         } else {
             for (let char of inputText) {
-                outputText += reverseSymbolMap[char] || char; // Use the letter if available, else keep the original character
+                const letter = reverseSymbolMap[char] || char; // Use the letter if available, else keep the original character
+                outputText += letter;
+                console.log(`Symbol: ${char} -> Letter: ${letter}`);
             }
         }
 
+        console.log('Output Text:', outputText);
         document.getElementById('outputText').innerText = outputText;
     }
 
