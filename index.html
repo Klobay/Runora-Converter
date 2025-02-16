@@ -32,6 +32,12 @@
         animation: colorChange 5s infinite;
     }
 
+    /* Textarea Container */
+    .textarea-container {
+        position: relative;
+        margin-bottom: 20px;
+    }
+
     /* Textarea Styles */
     textarea {
         width: 300px;
@@ -40,9 +46,26 @@
         font-size: 16px;
         border: 2px solid #6200ea;
         border-radius: 8px;
-        margin-bottom: 20px;
         resize: none;
         transition: border-color 0.3s ease, background-color 0.3s ease, color 0.3s ease;
+    }
+
+    /* Clear Button Styles */
+    .clear-button {
+        position: absolute;
+        right: 10px;
+        top: 10px;
+        background-color: #ccc;
+        color: #333;
+        border: none;
+        padding: 5px 10px;
+        font-size: 14px;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+    .clear-button:hover {
+        background-color: #bbb;
     }
 
     /* Button Styles */
@@ -140,7 +163,10 @@
 </head>
 <body>
 <h1>Runora Converter</h1>
-<textarea id="inputText" rows="4" cols="50" placeholder="Enter text here..."></textarea>
+<div class="textarea-container">
+    <textarea id="inputText" rows="4" cols="50" placeholder="Enter text here..."></textarea>
+    <button class="clear-button" onclick="clearText()">×</button>
+</div>
 <br>
 <button onclick="convertText()">Convert</button>
 <button onclick="toggleConversion()" id="toggleButton">Switch to Symbols to Alphabet</button>
@@ -271,12 +297,18 @@
         }
     }
 
+    // Function to clear the text in the textarea
+    function clearText() {
+        document.getElementById('inputText').value = '';
+    }
+
     // Function to set the theme
     function setTheme(theme) {
         const body = document.body;
         const textarea = document.getElementById('inputText');
         const outputText = document.getElementById('outputText');
         const buttons = document.querySelectorAll('button');
+        const clearButton = document.querySelector('.clear-button');
 
         if (theme === 'light') {
             body.style.backgroundColor = '#f4f4f9';
@@ -291,6 +323,8 @@
                 button.style.backgroundColor = '#6200ea';
                 button.style.color = '#fff';
             });
+            clearButton.style.backgroundColor = '#ccc';
+            clearButton.style.color = '#333';
         } else if (theme === 'dark') {
             body.style.backgroundColor = '#333';
             body.style.color = '#f4f4f9';
@@ -304,6 +338,8 @@
                 button.style.backgroundColor = '#bb86fc';
                 button.style.color = '#333';
             });
+            clearButton.style.backgroundColor = '#666';
+            clearButton.style.color = '#f4f4f9';
         }
 
         // Save the selected theme to localStorage
@@ -322,6 +358,7 @@
         const textarea = document.getElementById('inputText');
         const outputText = document.getElementById('outputText');
         const buttons = document.querySelectorAll('button');
+        const clearButton = document.querySelector('.clear-button');
 
         // Get custom colors
         const bgColor = document.getElementById('bgColor').value;
@@ -344,6 +381,8 @@
             button.style.backgroundColor = buttonBgColor;
             button.style.color = buttonTextColor;
         });
+        clearButton.style.backgroundColor = '#ccc'; // Keep the clear button grey
+        clearButton.style.color = textColor;
 
         // Save custom theme to localStorage
         const customTheme = {
@@ -374,6 +413,7 @@
                 const textarea = document.getElementById('inputText');
                 const outputText = document.getElementById('outputText');
                 const buttons = document.querySelectorAll('button');
+                const clearButton = document.querySelector('.clear-button');
 
                 body.style.backgroundColor = customTheme.bgColor;
                 body.style.color = customTheme.textColor;
@@ -387,6 +427,8 @@
                     button.style.backgroundColor = customTheme.buttonBgColor;
                     button.style.color = customTheme.buttonTextColor;
                 });
+                clearButton.style.backgroundColor = '#ccc'; // Keep the clear button grey
+                clearButton.style.color = customTheme.textColor;
             }
         }
     }
