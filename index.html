@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Runora Converter</title>
-<!-- Import Google Font -->
-<link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
+<!-- Import Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Rubik&display=swap" rel="stylesheet">
 <style>
     /* Base Styles */
     body {
@@ -60,7 +60,7 @@
         background: linear-gradient(to bottom, #333, #444);
         z-index: -1;
         opacity: 0;
-        transition: opacity 0.5s ease, clip-path 0.5s ease;
+        transition: opacity 0.5s ease;
         clip-path: circle(0% at 95% 5%);
     }
     body.dark .gradient-overlay {
@@ -80,12 +80,16 @@
 
     /* Title Styles */
     h1 {
-        margin: 20px 0;
-        font-size: 3rem; /* Slightly larger for desktop */
-        font-family: 'Patrick Hand', cursive;
+        margin: 5px 0; /* Moved further up */
+        font-size: clamp(2rem, 8vw, 3.5rem); /* Dynamically scales for mobile and desktop */
+        font-family: 'Rubik', sans-serif;
         font-weight: 400;
         text-align: center;
         animation: colorChange 5s infinite;
+        white-space: nowrap; /* Ensure it stays in one line */
+        overflow: hidden; /* Prevent wrapping */
+        text-overflow: ellipsis; /* Add ellipsis if text overflows */
+        width: 100%; /* Ensure it takes full width */
     }
 
     /* Usage Instructions */
@@ -303,7 +307,7 @@
         <button class="clear-button" onclick="clearText()">×</button>
     </div>
     <div class="button-container">
-        <button onclick="toggleConversion()" id="toggleButton">Switch</button>
+        <button onclick="toggleConversion()" id="toggleButton">Alphabet → Runora</button>
         <button onclick="copyOutput()">Copy Converted Text</button>
     </div>
     <h2>Converted Text:</h2>
@@ -371,6 +375,7 @@
         toggleButton.textContent = conversionType === 'alphabetToSymbol' 
             ? 'Alphabet → Runora' 
             : 'Runora → Alphabet';
+        convertText(); // Convert the text immediately after toggling
     }
 
     // Function to convert text
