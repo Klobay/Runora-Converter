@@ -272,6 +272,96 @@
         animation: rotate 0.5s ease;
     }
 
+    /* Login Modal Styles */
+    .login-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        justify-content: center;
+        align-items: center;
+        z-index: 3;
+    }
+    .login-modal.show {
+        display: flex;
+    }
+    .login-box {
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        text-align: center;
+        max-width: 300px;
+        width: 90%;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+    body.dark .login-box {
+        background-color: #444;
+        color: #f4f4f9;
+    }
+    .login-box input {
+        width: calc(100% - 20px);
+        padding: 10px;
+        margin: 10px 0;
+        border: 2px solid #6200ea;
+        border-radius: 8px;
+        font-size: 16px;
+    }
+    .login-box button {
+        width: 100%;
+        max-width: none;
+    }
+    .error-message {
+        color: #ff4444;
+        font-size: 14px;
+        margin-top: 10px;
+        display: none;
+    }
+
+    /* Admin Modal Styles */
+    .admin-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        justify-content: center;
+        align-items: center;
+        z-index: 3;
+    }
+    .admin-modal.show {
+        display: flex;
+    }
+    .admin-box {
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        text-align: center;
+        max-width: 300px;
+        width: 90%;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+    body.dark .admin-box {
+        background-color: #444;
+        color: #f4f4f9;
+    }
+    .admin-box input {
+        width: calc(100% - 20px);
+        padding: 10px;
+        margin: 10px 0;
+        border: 2px solid #6200ea;
+        border-radius: 8px;
+        font-size: 16px;
+    }
+    .admin-box button {
+        width: 100%;
+        max-width: none;
+    }
+
     /* Keyframes for animations */
     @keyframes colorChange {
         0% { color: #6200ea; }
@@ -297,7 +387,28 @@
 <!-- Theme Toggle Button -->
 <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
 
-<div class="container">
+<!-- Login Modal -->
+<div class="login-modal" id="loginModal">
+    <div class="login-box">
+        <h2>Enter Access Code</h2>
+        <input type="password" id="accessCode" placeholder="Enter code...">
+        <button onclick="verifyAccessCode()">Submit</button>
+        <p class="error-message" id="errorMessage">Incorrect code. Please try again.</p>
+    </div>
+</div>
+
+<!-- Admin Modal -->
+<div class="admin-modal" id="adminModal">
+    <div class="admin-box">
+        <h2>Admin Access</h2>
+        <input type="password" id="adminCode" placeholder="Enter admin code...">
+        <input type="number" id="sessionDays" placeholder="Session duration (days)">
+        <button onclick="updateSessionDuration()">Update Duration</button>
+        <p class="error-message" id="adminErrorMessage">Incorrect admin code.</p>
+    </div>
+</div>
+
+<div class="container" id="mainContent" style="display: none;">
     <h1>Runora Converter</h1>
     <p class="instructions">
         Convert text between the alphabet and Runora in real-time! Simply type in the box below, and the conversion will happen automatically. Use the buttons to switch conversion modes or copy the result.
@@ -309,6 +420,7 @@
     <div class="button-container">
         <button onclick="toggleConversion()" id="toggleButton">Alphabet → Runora</button>
         <button onclick="copyOutput()">Copy Converted Text</button>
+        <button onclick="showAdminModal()">Admin Settings</button>
     </div>
     <h2>Converted Text:</h2>
     <p id="outputText"></p>
@@ -448,9 +560,6 @@
         updateHistory(); // Update the history display
     }
 
-    // Real-time conversion
-    document.getElementById('inputText').addEventListener('input', convertText);
-
     // Theme Toggle Function
     function toggleTheme() {
         const body = document.body;
@@ -491,7 +600,69 @@
         }
     }
 
-    window.onload = loadTheme;
-</script>
-</body>
-</html>
+    // Simple hash function for code verification
+    function simpleHash(str) {
+        let hash = 0;
+        for (let i = 0; i < str.length; i++) {
+            const char = str.charCodeAt(i);
+            hash = ((hash << 5) - hash) + char;
+            hash = hash & hash; // Convert to 32-bit integer
+        }
+        return hash.toString();
+    }
+
+    // Pre-hashed codes
+    const VALID_CODE_HASH = simpleHash('Runora2025'); // User access code
+    const ADMIN_CODE_HASH = simpleHash('AdminRunora2025'); // Admin code
+    const DEFAULT_SESSION_DAYS = 7; // Default session duration in days
+
+    // Function to check session validity
+    function isSessionValid() {
+        const sessionData = JSON.parse(localStorage.getItem('sessionData') || '{}');
+        if (!sessionData.token || sessionData.token !== VALID_CODE_HASH) {
+            return false;
+        }
+        const loginTime = sessionData.loginTime || 0;
+        const sessionDurationDays = parseInt(localStorage.getItem('sessionDurationDays') || DEFAULT_SESSION_DAYS);
+        const sessionDurationMs = sessionDurationDays * 24 * 60 * 60 * 1000;
+        const currentTime = new Date().getTime();
+        return currentTime - loginTime < sessionDurationMs;
+    }
+
+    // Function to verify access code
+    function verifyAccessCode() {
+        const codeInput = document.getElementById('accessCode').value;
+        const errorMessage = document.getElementById('errorMessage');
+        if (simpleHash(codeInput) === VALID_CODE_HASH) {
+            localStorage.setItem('sessionData', JSON.stringify({
+                token: VALID_CODE_HASH,
+                loginTime: new Date().getTime()
+            }));
+            document.getElementById('loginModal').classList.remove('show');
+            document.getElementById('mainContent').style.display = 'flex';
+            document.getElementById('accessCode').value = '';
+            errorMessage.style.display = 'none';
+        } else {
+            errorMessage.style.display = 'block';
+        }
+    }
+
+    // Function to show admin modal
+    function showAdminModal() {
+        document.getElementById('adminModal').classList.add('show');
+    }
+
+    // Function to update session duration
+    function updateSessionDuration() {
+        const adminCode = document.getElementById('adminCode').value;
+        const sessionDays = document.getElementById('sessionDays').value;
+        const adminErrorMessage = document.getElementById('adminErrorMessage');
+        if (simpleHash(adminCode) === ADMIN_CODE_HASH) {
+            const days = parseInt(sessionDays);
+            if (days > 0) {
+                localStorage.setItem('sessionDurationDays', days);
+                document.getElementById('adminModal').classList.remove('show');
+                document.getElementById('adminCode').value = '';
+                document.getElementById('sessionDays').value = '';
+                adminErrorMessage.style.display = 'none';
+          
