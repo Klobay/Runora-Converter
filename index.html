@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Runora Converter</title>
-<!-- Import Google Fonts -->
 <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Rubik&display=swap" rel="stylesheet">
 <style>
     /* Base Styles */
@@ -381,34 +380,9 @@
 </style>
 </head>
 <body>
-<!-- Gradient Overlay for Theme Transition -->
 <div class="gradient-overlay"></div>
-
-<!-- Theme Toggle Button -->
 <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
-
-<!-- Login Modal -->
-<div class="login-modal" id="loginModal">
-    <div class="login-box">
-        <h2>Enter Access Code</h2>
-        <input type="password" id="accessCode" placeholder="Enter code...">
-        <button onclick="verifyAccessCode()">Submit</button>
-        <p class="error-message" id="errorMessage">Incorrect code. Please try again.</p>
-    </div>
-</div>
-
-<!-- Admin Modal -->
-<div class="admin-modal" id="adminModal">
-    <div class="admin-box">
-        <h2>Admin Access</h2>
-        <input type="password" id="adminCode" placeholder="Enter admin code...">
-        <input type="number" id="sessionDays" placeholder="Session duration (days)">
-        <button onclick="updateSessionDuration()">Update Duration</button>
-        <p class="error-message" id="adminErrorMessage">Incorrect admin code.</p>
-    </div>
-</div>
-
-<div class="container" id="mainContent" style="display: none;">
+<div class="container" id="mainContent">
     <h1>Runora Converter</h1>
     <p class="instructions">
         Convert text between the alphabet and Runora in real-time! Simply type in the box below, and the conversion will happen automatically. Use the buttons to switch conversion modes or copy the result.
@@ -420,12 +394,9 @@
     <div class="button-container">
         <button onclick="toggleConversion()" id="toggleButton">Alphabet → Runora</button>
         <button onclick="copyOutput()">Copy Converted Text</button>
-        <button onclick="showAdminModal()">Admin Settings</button>
     </div>
     <h2>Converted Text:</h2>
     <p id="outputText"></p>
-
-    <!-- Conversion History -->
     <div class="history">
         <h3>
             Conversion History
@@ -434,255 +405,99 @@
         <div id="historyList"></div>
     </div>
 </div>
-
 <script>
-    // Define the mapping between letters and Runora
-    const symbolMap = {
-        'A': '∣',
-        'B': '‒',
-        'C': 'ˁ',
-        'D': '●',
-        'E': '⋋',
-        'F': '⋌',
-        'G': '≺',
-        'H': '⋏',
-        'I': '≖',
-        'J': '≻',
-        'K': '⊼',
-        'L': '∦',
-        'M': '⋂',
-        'N': '⋃',
-        'O': '∅',
-        'P': '∸',
-        'Q': '∀',
-        'R': '∈',
-        'S': '∼',
-        'T': 'T',
-        'U': '∃',
-        'V': '⋎',
-        'W': 'w',
-        'X': 'X',
-        'Y': 'Y',
-        'Z': 'Ω'
-    };
+const symbolMap = {
+    'A': '∣','B': '‒','C': 'ˁ','D': '●','E': '⋋','F': '⋌','G': '≺','H': '⋏','I': '≖','J': '≻','K': '⊼','L': '∦','M': '⋂','N': '⋃','O': '∅','P': '∸','Q': '∀','R': '∈','S': '∼','T': 'T','U': '∃','V': '⋎','W': 'w','X': 'X','Y': 'Y','Z': 'Ω'
+};
+const reverseSymbolMap = {};
+for (const [key, value] of Object.entries(symbolMap)) reverseSymbolMap[value] = key;
+reverseSymbolMap['ω'] = 'W';
+reverseSymbolMap['Ω'] = 'Z';
+let conversionType = 'alphabetToSymbol';
+let history = [];
+let lastInput = '';
 
-    // Create a reverse mapping for Runora to letters
-    const reverseSymbolMap = {};
-    for (const [key, value] of Object.entries(symbolMap)) {
-        reverseSymbolMap[value] = key;
+function toggleConversion() {
+    conversionType = conversionType === 'alphabetToSymbol' ? 'symbolToAlphabet' : 'alphabetToSymbol';
+    document.getElementById('toggleButton').textContent = conversionType === 'alphabetToSymbol' ? 'Alphabet → Runora' : 'Runora → Alphabet';
+    convertText();
+}
+
+function convertText() {
+    const inputText = document.getElementById('inputText').value.toUpperCase();
+    let outputText = '';
+    if (conversionType === 'alphabetToSymbol') {
+        for (let char of inputText) outputText += symbolMap[char] || char;
+    } else {
+        for (let char of inputText) outputText += reverseSymbolMap[char] || char;
     }
-
-    // Explicitly map ω to W and Ω to Z
-    reverseSymbolMap['ω'] = 'W';
-    reverseSymbolMap['Ω'] = 'Z';
-
-    let conversionType = 'alphabetToSymbol'; // Default conversion type
-    let history = []; // Store conversion history
-    let lastInput = ''; // Track the last input to avoid saving intermediate steps
-
-    // Function to toggle conversion type
-    function toggleConversion() {
-        conversionType = conversionType === 'alphabetToSymbol' ? 'symbolToAlphabet' : 'alphabetToSymbol';
-        const toggleButton = document.getElementById('toggleButton');
-        toggleButton.textContent = conversionType === 'alphabetToSymbol' 
-            ? 'Alphabet → Runora' 
-            : 'Runora → Alphabet';
-        convertText(); // Convert the text immediately after toggling
+    document.getElementById('outputText').innerText = outputText;
+    if (inputText.trim() && inputText !== lastInput) {
+        history.push({ input: inputText, output: outputText });
+        lastInput = inputText;
+        updateHistory();
     }
+}
 
-    // Function to convert text
-    function convertText() {
-        const inputText = document.getElementById('inputText').value.toUpperCase();
-        let outputText = '';
+function updateHistory() {
+    const historyList = document.getElementById('historyList');
+    historyList.innerHTML = history.slice(-5).map(item => `<div class="history-item" onclick="useHistoryItem('${item.input}')"><strong>${item.input}</strong> → ${item.output}</div>`).join('');
+}
 
-        if (conversionType === 'alphabetToSymbol') {
-            for (let char of inputText) {
-                const symbol = symbolMap[char] || char;
-                outputText += symbol;
-            }
-        } else {
-            for (let char of inputText) {
-                const letter = reverseSymbolMap[char] || char;
-                outputText += letter;
-            }
-        }
+function useHistoryItem(input) {
+    document.getElementById('inputText').value = input;
+    convertText();
+}
 
-        document.getElementById('outputText').innerText = outputText;
+function copyOutput() {
+    const outputText = document.getElementById('outputText').innerText;
+    if (outputText) navigator.clipboard.writeText(outputText).then(() => alert('Converted text copied to clipboard!')).catch(() => alert('Failed to copy text.'));
+    else alert('No converted text to copy.');
+}
 
-        // Save to history only if the input is complete (not intermediate steps)
-        if (inputText.trim() !== '' && inputText !== lastInput) {
-            history.push({ input: inputText, output: outputText });
-            lastInput = inputText; // Update the last input
-            updateHistory();
-        }
+function clearText() {
+    document.getElementById('inputText').value = '';
+    document.getElementById('outputText').innerText = '';
+}
+
+function clearHistory() {
+    history = [];
+    lastInput = '';
+    updateHistory();
+}
+
+function toggleTheme() {
+    const body = document.body;
+    const themeToggle = document.querySelector('.theme-toggle');
+    if (body.classList.contains('dark')) {
+        body.classList.remove('dark');
+        themeToggle.textContent = '☀️';
+    } else {
+        body.classList.add('dark');
+        themeToggle.textContent = '🌙';
     }
+    themeToggle.classList.add('rotate');
+    setTimeout(() => themeToggle.classList.remove('rotate'), 500);
+    localStorage.setItem('theme', body.classList.contains('dark') ? 'dark' : 'light');
+}
 
-    // Function to update conversion history
-    function updateHistory() {
-        const historyList = document.getElementById('historyList');
-        historyList.innerHTML = history.slice(-5).map(item => `
-            <div class="history-item" onclick="useHistoryItem('${item.input}')">
-                <strong>${item.input}</strong> → ${item.output}
-            </div>
-        `).join('');
+function loadTheme() {
+    const savedTheme = localStorage.getItem('theme');
+    const themeToggle = document.querySelector('.theme-toggle');
+    if (savedTheme === 'dark') {
+        document.body.classList.add('dark');
+        themeToggle.textContent = '🌙';
+    } else {
+        document.body.classList.remove('dark');
+        themeToggle.textContent = '☀️';
     }
+}
 
-    // Function to use a history item
-    function useHistoryItem(input) {
-        document.getElementById('inputText').value = input;
-        convertText();
-    }
-
-    // Function to copy the converted text
-    function copyOutput() {
-        const outputText = document.getElementById('outputText').innerText;
-        if (outputText) {
-            navigator.clipboard.writeText(outputText).then(() => {
-                alert('Converted text copied to clipboard!');
-            }).catch(() => {
-                alert('Failed to copy text. Please ensure your browser supports clipboard access.');
-            });
-        } else {
-            alert('No converted text to copy.');
-        }
-    }
-
-    // Function to clear the text in the textarea
-    function clearText() {
-        document.getElementById('inputText').value = '';
-        document.getElementById('outputText').innerText = '';
-    }
-
-    // Function to clear the conversion history
-    function clearHistory() {
-        history = []; // Clear the history array
-        lastInput = ''; // Reset the last input
-        updateHistory(); // Update the history display
-    }
-
-    // Theme Toggle Function
-    function toggleTheme() {
-        const body = document.body;
-        const themeToggle = document.querySelector('.theme-toggle');
-        const gradientOverlay = document.querySelector('.gradient-overlay');
-
-        // Toggle theme
-        if (body.classList.contains('dark')) {
-            body.classList.remove('dark');
-            themeToggle.textContent = '☀️';
-        } else {
-            body.classList.add('dark');
-            themeToggle.textContent = '🌙';
-        }
-
-        // Add rotation animation
-        themeToggle.classList.add('rotate');
-        setTimeout(() => {
-            themeToggle.classList.remove('rotate');
-        }, 500); // Match the duration of the rotation animation
-
-        // Save the selected theme to localStorage
-        const isDarkMode = body.classList.contains('dark');
-        localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
-    }
-
-    // Load the saved theme when the page loads
-    function loadTheme() {
-        const savedTheme = localStorage.getItem('theme');
-        const themeToggle = document.querySelector('.theme-toggle');
-
-        if (savedTheme === 'dark') {
-            document.body.classList.add('dark');
-            themeToggle.textContent = '🌙';
-        } else {
-            document.body.classList.remove('dark');
-            themeToggle.textContent = '☀️';
-        }
-    }
-
-    // Simple hash function for code verification
-    function simpleHash(str) {
-        let hash = 0;
-        for (let i = 0; i < str.length; i++) {
-            const char = str.charCodeAt(i);
-            hash = ((hash << 5) - hash) + char;
-            hash = hash & hash; // Convert to 32-bit integer
-        }
-        return hash.toString();
-    }
-
-    // Pre-hashed codes
-    const VALID_CODE_HASH = simpleHash('Runora2025'); // User access code
-    const ADMIN_CODE_HASH = simpleHash('AdminRunora2025'); // Admin code
-    const DEFAULT_SESSION_DAYS = 7; // Default session duration in days
-
-    // Function to check session validity
-    function isSessionValid() {
-        const sessionData = JSON.parse(localStorage.getItem('sessionData') || '{}');
-        if (!sessionData.token || sessionData.token !== VALID_CODE_HASH) {
-            return false;
-        }
-        const loginTime = sessionData.loginTime || 0;
-        const sessionDurationDays = parseInt(localStorage.getItem('sessionDurationDays') || DEFAULT_SESSION_DAYS);
-        const sessionDurationMs = sessionDurationDays * 24 * 60 * 60 * 1000;
-        const currentTime = new Date().getTime();
-        return currentTime - loginTime < sessionDurationMs;
-    }
-
-    // Function to verify access code
-    function verifyAccessCode() {
-        const codeInput = document.getElementById('accessCode').value;
-        const errorMessage = document.getElementById('errorMessage');
-        if (simpleHash(codeInput) === VALID_CODE_HASH) {
-            localStorage.setItem('sessionData', JSON.stringify({
-                token: VALID_CODE_HASH,
-                loginTime: new Date().getTime()
-            }));
-            document.getElementById('loginModal').classList.remove('show');
-            document.getElementById('mainContent').style.display = 'flex';
-            document.getElementById('accessCode').value = '';
-            errorMessage.style.display = 'none';
-        } else {
-            errorMessage.style.display = 'block';
-        }
-    }
-
-    // Function to show admin modal
-    function showAdminModal() {
-        document.getElementById('adminModal').classList.add('show');
-    }
-
-    // Function to update session duration
-    function updateSessionDuration() {
-        const adminCode = document.getElementById('adminCode').value;
-        const sessionDays = document.getElementById('sessionDays').value;
-        const adminErrorMessage = document.getElementById('adminErrorMessage');
-        if (simpleHash(adminCode) === ADMIN_CODE_HASH) {
-            const days = parseInt(sessionDays);
-            if (days > 0) {
-                localStorage.setItem('sessionDurationDays', days);
-                document.getElementById('adminModal').classList.remove('show');
-                document.getElementById('adminCode').value = '';
-                document.getElementById('sessionDays').value = '';
-                adminErrorMessage.style.display = 'none';
-            }
-        } else {
-            adminErrorMessage.style.display = 'block';
-        }
-    }
-
-    // On page load
-    window.onload = function () {
-        loadTheme();
-        if (isSessionValid()) {
-            document.getElementById('mainContent').style.display = 'flex';
-        } else {
-            document.getElementById('loginModal').classList.add('show');
-        }
-
-        document.getElementById('inputText').addEventListener('input', convertText);
-    };
+window.onload = function () {
+    loadTheme();
+    document.getElementById('mainContent').style.display = 'flex';
+    document.getElementById('inputText').addEventListener('input', convertText);
+};
 </script>
 </body>
 </html>
-          
