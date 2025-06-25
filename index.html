@@ -665,4 +665,24 @@
                 document.getElementById('adminCode').value = '';
                 document.getElementById('sessionDays').value = '';
                 adminErrorMessage.style.display = 'none';
+            }
+        } else {
+            adminErrorMessage.style.display = 'block';
+        }
+    }
+
+    // On page load
+    window.onload = function () {
+        loadTheme();
+        if (isSessionValid()) {
+            document.getElementById('mainContent').style.display = 'flex';
+        } else {
+            document.getElementById('loginModal').classList.add('show');
+        }
+
+        document.getElementById('inputText').addEventListener('input', convertText);
+    };
+</script>
+</body>
+</html>
           
