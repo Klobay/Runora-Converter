@@ -1,438 +1,503 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Runora Converter</title>
-  <!-- Modern font -->
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
-  <style>
-    /* ===== Modern Glassmorphic Theme (Light & Dark) ===== */
-    :root{
-      --accent1: #6a5acd;
-      --accent2: #bb86fc;
-      --accent-glow: rgba(106,90,205,0.18);
-      --danger: #ff4444;
-      --surface-light: rgba(255,255,255,0.42);
-      --surface-dark: rgba(30,30,40,0.44);
-    }
-
-    /* Base layout */
-    *{box-sizing:border-box}
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Runora Converter</title>
+<link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Rubik&display=swap" rel="stylesheet">
+<style>
+    /* Base Styles */
     body {
-      font-family: 'Poppins', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-      margin: 0;
-      padding: 40px 20px;
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      flex-direction: column;
-      transition: background 0.5s ease, color 0.4s ease;
-      background: linear-gradient(135deg, #e9ecff 0%, #f4f6fb 100%);
-      color: #111;
-      -webkit-font-smoothing:antialiased;
-      -moz-osx-font-smoothing:grayscale;
-      overflow-x:hidden;
+        font-family: 'Arial', sans-serif;
+        margin: 0;
+        padding: 20px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        flex-direction: column;
+        background-color: #f4f4f9;
+        color: #333;
+        transition: background-color 0.3s ease, color 0.3s ease;
+        position: relative;
     }
 
-    /* Dark mode */
+    /* Dark Mode Styles */
     body.dark {
-      background: radial-gradient(circle at 10% 10%, #0f1222 0%, #141422 50%, #0b0b10 100%);
-      color: #eee;
+        background-color: #333;
+        color: #f4f4f9;
+    }
+    body.dark textarea,
+    body.dark #outputText,
+    body.dark .history {
+        background-color: #444;
+        color: #f4f4f9;
+        border-color: #bb86fc;
+    }
+    body.dark .history-item:hover {
+        background-color: #555;
+    }
+    body.dark .clear-button {
+        background-color: #666;
+        color: #f4f4f9;
+    }
+    body.dark button {
+        background-color: #bb86fc;
+        color: #333;
+    }
+    body.dark .history h3 {
+        color: #bb86fc;
     }
 
-    /* Subtle background overlay for dark mode */
-    .gradient-overlay{
-      position: fixed;
-      inset: 0;
-      z-index: -1;
-      pointer-events: none;
-      transition: opacity .5s ease;
-      opacity: 0;
-      background: linear-gradient(180deg, rgba(10,10,12,0.25), rgba(30,20,40,0.15));
-      mix-blend-mode: overlay;
+    /* Gradient Transition Overlay */
+    .gradient-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(to bottom, #333, #444);
+        z-index: -1;
+        opacity: 0;
+        transition: opacity 0.5s ease;
+        clip-path: circle(0% at 95% 5%);
     }
-    body.dark .gradient-overlay{ opacity: 1; }
+    body.dark .gradient-overlay {
+        opacity: 1;
+        clip-path: circle(150% at 95% 5%);
+    }
 
-    /* Glass container */
+    /* Container for centering */
     .container {
-      width: 100%;
-      max-width: 560px;
-      padding: 34px;
-      border-radius: 18px;
-      background: var(--surface-light);
-      backdrop-filter: blur(14px) saturate(120%);
-      -webkit-backdrop-filter: blur(14px) saturate(120%);
-      border: 1px solid rgba(255,255,255,0.45);
-      box-shadow: 0 8px 30px rgba(20,20,40,0.06);
-      display:flex;
-      flex-direction:column;
-      align-items: center;
-      gap:10px;
-      transition: background .4s ease, border-color .4s ease, box-shadow .4s ease;
-    }
-    body.dark .container {
-      background: var(--surface-dark);
-      border: 1px solid rgba(255,255,255,0.06);
-      box-shadow: 0 12px 40px rgba(3,3,10,0.6);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+        max-width: 500px; /* Slightly wider for desktop */
+        z-index: 1;
     }
 
-    /* Title */
-    h1{
-      margin:0;
-      font-size: clamp(1.8rem,5vw,2.6rem);
-      font-weight:600;
-      text-align:center;
-      background: linear-gradient(90deg, var(--accent1), var(--accent2));
-      -webkit-background-clip:text;
-      -webkit-text-fill-color:transparent;
-      display:block;
-      width:100%;
+    /* Title Styles */
+    h1 {
+        margin: 5px 0; /* Moved further up */
+        font-size: clamp(2rem, 8vw, 3.5rem); /* Dynamically scales for mobile and desktop */
+        font-family: 'Rubik', sans-serif;
+        font-weight: 400;
+        text-align: center;
+        animation: colorChange 5s infinite;
+        white-space: nowrap; /* Ensure it stays in one line */
+        overflow: hidden; /* Prevent wrapping */
+        text-overflow: ellipsis; /* Add ellipsis if text overflows */
+        width: 100%; /* Ensure it takes full width */
     }
 
-    /* Instructions */
-    .instructions{
-      text-align:center;
-      color: rgba(0,0,0,0.6);
-      font-size: 0.95rem;
-      margin: 6px 0 18px;
-      max-width:460px;
-    }
-    body.dark .instructions{ color: rgba(255,255,255,0.75); }
-
-    /* Textarea container */
-    .textarea-container{
-      position: relative;
-      width:100%;
+    /* Usage Instructions */
+    .instructions {
+        text-align: center;
+        margin: 0 20px 20px;
+        font-size: 1rem;
+        color: #666;
+        max-width: 500px;
     }
 
-    textarea{
-      width:100%;
-      height:120px;
-      padding:14px 52px 14px 16px;
-      border-radius:12px;
-      border: 1px solid rgba(98,0,234,0.14);
-      background: rgba(255,255,255,0.18);
-      color: inherit;
-      font-size:15px;
-      resize:none;
-      outline:none;
-      transition: box-shadow .25s ease, transform .18s ease, background .3s ease;
-      backdrop-filter: blur(6px);
-      box-shadow: 0 6px 18px rgba(98,0,234,0.03) inset;
-    }
-    textarea:focus{
-      box-shadow: 0 10px 30px var(--accent-glow);
-      transform: translateY(-2px);
-      border-color: rgba(98,0,234,0.28);
-      background: rgba(255,255,255,0.24);
-    }
-    body.dark textarea{
-      background: rgba(20,20,30,0.38);
-      border-color: rgba(187,134,252,0.12);
-      box-shadow: none;
+    /* Textarea Container */
+    .textarea-container {
+        position: relative;
+        margin-bottom: 20px;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
     }
 
-    /* Clear button inside textarea */
-    .clear-button{
-      position:absolute;
-      right:12px;
-      top:12px;
-      width:34px;
-      height:34px;
-      border-radius:50%;
-      border:none;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      cursor:pointer;
-      font-size:16px;
-      background: linear-gradient(180deg, rgba(255,255,255,0.6), rgba(255,255,255,0.25));
-      color: #222;
-      box-shadow: 0 6px 18px rgba(0,0,0,0.06);
-      transition: transform .18s ease, opacity .2s;
-    }
-    .clear-button:hover{ transform: scale(1.06); }
-    body.dark .clear-button{
-      background: rgba(255,255,255,0.06);
-      color: #eee;
-      box-shadow: none;
+    /* Textarea Styles */
+    textarea {
+        width: 100%;
+        height: 100px;
+        padding: 10px;
+        font-size: 16px;
+        border: 2px solid #6200ea;
+        border-radius: 8px;
+        resize: none;
+        transition: border-color 0.3s ease, background-color 0.3s ease, color 0.3s ease;
     }
 
-    /* Buttons block */
-    .button-container{
-      width:100%;
-      display:flex;
-      gap:12px;
-      justify-content: center;
-      align-items:center;
-      margin-top:6px;
-      flex-wrap:wrap;
+    /* Clear Button Styles */
+    .clear-button {
+        position: absolute;
+        right: 10px;
+        top: 10px;
+        background-color: #ccc;
+        color: #333;
+        border: none;
+        padding: 5px;
+        font-size: 14px;
+        border-radius: 50%;
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: background-color 0.3s ease, opacity 0.3s ease;
+        opacity: 0.7;
     }
-    .btn{
-      padding:12px 18px;
-      border-radius:12px;
-      border: none;
-      cursor:pointer;
-      font-weight:600;
-      font-size:15px;
-      min-width:160px;
-      transition: transform .18s ease, box-shadow .2s ease;
-      color:#fff;
-      background: linear-gradient(90deg, var(--accent1), var(--accent2));
-      box-shadow: 0 10px 30px rgba(106,90,205,0.12);
-    }
-    .btn:hover{ transform: translateY(-3px); box-shadow: 0 16px 40px rgba(106,90,205,0.18); }
-    body.dark .btn{ box-shadow: 0 12px 36px rgba(0,0,0,0.6); }
-
-    /* Output */
-    h2{ margin:18px 0 6px; font-size:1.1rem; width:100%; text-align:center; }
-    #outputText{
-      width:100%;
-      min-height:56px;
-      padding:12px;
-      border-radius:10px;
-      border:1px solid rgba(98,0,234,0.14);
-      background: rgba(255,255,255,0.14);
-      backdrop-filter: blur(8px);
-      font-size:16px;
-      word-wrap:break-word;
-      opacity: 0;
-      transform: translateY(6px);
-      animation: fadeIn .42s ease forwards;
-    }
-    body.dark #outputText{
-      background: rgba(20,20,30,0.28);
-      border-color: rgba(187,134,252,0.08);
+    .clear-button:hover {
+        background-color: #bbb;
+        opacity: 1;
     }
 
-    /* History box */
-    .history{
-      width:100%;
-      margin-top:10px;
-      max-height:170px;
-      overflow:auto;
-      padding:10px;
-      border-radius:12px;
-      border:1px solid rgba(98,0,234,0.12);
-      background: rgba(255,255,255,0.08);
-      display:block;
-      backdrop-filter: blur(8px);
-    }
-    body.dark .history{
-      background: rgba(10,10,18,0.18);
-      border-color: rgba(255,255,255,0.04);
-    }
-    .history h3{
-      margin:4px 0 10px;
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:12px;
-      color: var(--accent1);
-      font-size:0.95rem;
-    }
-    body.dark .history h3{ color: var(--accent2); }
-
-    .history-item{
-      padding:8px;
-      border-radius:8px;
-      cursor:pointer;
-      transition: background .18s ease, transform .12s ease;
-      display:flex;
-      gap:8px;
-      align-items:center;
-      justify-content:space-between;
-      font-size:14px;
-    }
-    .history-item:hover{
-      background: rgba(106,90,205,0.08);
-      transform: translateY(-2px);
-    }
-    body.dark .history-item:hover{ background: rgba(187,134,252,0.09); }
-
-    .clear-history-button{
-      background: var(--danger);
-      color: white;
-      border:none;
-      padding:6px 10px;
-      border-radius:8px;
-      cursor:pointer;
-      font-size:13px;
-    }
-    .clear-history-button:hover{ opacity:0.92; transform: translateY(-1px); }
-
-    /* Theme toggle */
-    .theme-toggle{
-      position: fixed;
-      top:18px;
-      right:18px;
-      width:52px;
-      height:52px;
-      border-radius:50%;
-      border:none;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-size:20px;
-      cursor:pointer;
-      background: linear-gradient(145deg,var(--accent1),var(--accent2));
-      color:white;
-      box-shadow: 0 8px 28px rgba(10,10,40,0.12);
-      z-index:20;
-      transition: transform .45s ease;
-    }
-    .theme-toggle.rotate{ transform: rotate(360deg); }
-
-    /* Small screens */
-    @media (max-width:460px){
-      .container{ padding:22px; border-radius:14px; }
-      textarea{ height:110px; padding-right:48px; }
-      .btn{ min-width:140px; font-size:14px; padding:10px 14px;}
+    /* Button Container */
+    .button-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
     }
 
-    /* Animations */
-    @keyframes fadeIn{
-      from{ opacity:0; transform: translateY(6px); }
-      to{ opacity:1; transform: translateY(0); }
+    /* Button Styles */
+    button {
+        background-color: #6200ea;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        font-size: 16px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+        width: 100%;
+        max-width: 200px;
     }
-  </style>
+    button:hover {
+        opacity: 0.9;
+        transform: scale(1.05);
+    }
+
+    /* Output Text Styles */
+    #outputText {
+        margin-top: 20px;
+        padding: 10px;
+        width: 100%;
+        min-height: 50px;
+        background-color: #fff;
+        border: 2px solid #6200ea;
+        border-radius: 8px;
+        font-size: 16px;
+        word-wrap: break-word;
+        transition: border-color 0.3s ease, background-color 0.3s ease, color 0.3s ease;
+        opacity: 0;
+        animation: fadeIn 0.5s ease forwards;
+    }
+
+    /* Converted Text Title */
+    h2 {
+        margin-top: 20px;
+        text-align: center;
+        width: 100%;
+        max-width: 500px;
+        font-size: 1.5rem;
+        white-space: nowrap; /* Ensure it stays on one line */
+    }
+
+    /* Conversion History Styles */
+    .history {
+        margin-top: 20px;
+        width: 100%;
+        max-height: 150px;
+        overflow-y: auto;
+        border: 2px solid #6200ea;
+        border-radius: 8px;
+        padding: 10px;
+        background-color: #fff;
+        font-size: 14px;
+        transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+    }
+    .history h3 {
+        margin: 0 0 10px;
+        font-size: 16px;
+        color: #6200ea;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .history-item {
+        margin-bottom: 5px;
+        padding: 5px;
+        border-bottom: 1px solid #eee;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+    .history-item:hover {
+        background-color: #f4f4f9;
+    }
+
+    /* Clear History Button */
+    .clear-history-button {
+        background-color: #ff4444;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        font-size: 12px;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+    .clear-history-button:hover {
+        background-color: #cc0000;
+    }
+
+    /* Theme Toggle Button */
+    .theme-toggle {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background-color: #6200ea;
+        color: white;
+        border: none;
+        padding: 10px;
+        font-size: 20px;
+        border-radius: 50%;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 50px;
+        height: 50px;
+        transition: transform 0.5s ease, background-color 0.3s ease;
+        z-index: 2;
+    }
+    .theme-toggle.rotate {
+        animation: rotate 0.5s ease;
+    }
+
+    /* Login Modal Styles */
+    .login-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        justify-content: center;
+        align-items: center;
+        z-index: 3;
+    }
+    .login-modal.show {
+        display: flex;
+    }
+    .login-box {
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        text-align: center;
+        max-width: 300px;
+        width: 90%;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+    body.dark .login-box {
+        background-color: #444;
+        color: #f4f4f9;
+    }
+    .login-box input {
+        width: calc(100% - 20px);
+        padding: 10px;
+        margin: 10px 0;
+        border: 2px solid #6200ea;
+        border-radius: 8px;
+        font-size: 16px;
+    }
+    .login-box button {
+        width: 100%;
+        max-width: none;
+    }
+    .error-message {
+        color: #ff4444;
+        font-size: 14px;
+        margin-top: 10px;
+        display: none;
+    }
+
+    /* Admin Modal Styles */
+    .admin-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        justify-content: center;
+        align-items: center;
+        z-index: 3;
+    }
+    .admin-modal.show {
+        display: flex;
+    }
+    .admin-box {
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        text-align: center;
+        max-width: 300px;
+        width: 90%;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+    body.dark .admin-box {
+        background-color: #444;
+        color: #f4f4f9;
+    }
+    .admin-box input {
+        width: calc(100% - 20px);
+        padding: 10px;
+        margin: 10px 0;
+        border: 2px solid #6200ea;
+        border-radius: 8px;
+        font-size: 16px;
+    }
+    .admin-box button {
+        width: 100%;
+        max-width: none;
+    }
+
+    /* Keyframes for animations */
+    @keyframes colorChange {
+        0% { color: #6200ea; }
+        25% { color: #bb86fc; }
+        50% { color: #03dac6; }
+        75% { color: #ff0266; }
+        100% { color: #6200ea; }
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    @keyframes rotate {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+</style>
 </head>
 <body>
-  <div class="gradient-overlay"></div>
-  <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
-
-  <div class="container" id="mainContent" style="display:none;">
+<div class="gradient-overlay"></div>
+<button class="theme-toggle" onclick="toggleTheme()">🌙</button>
+<div class="container" id="mainContent">
     <h1>Runora Converter</h1>
     <p class="instructions">
-      Convert text between the alphabet and Runora in real-time. Type below — conversion happens automatically. Use the buttons to switch modes or copy the result.
+        Convert text between the alphabet and Runora in real-time! Simply type in the box below, and the conversion will happen automatically. Use the buttons to switch conversion modes or copy the result.
     </p>
-
     <div class="textarea-container">
-      <textarea id="inputText" rows="4" cols="50" placeholder="Enter text here..."></textarea>
-      <button class="clear-button" onclick="clearText()">×</button>
+        <textarea id="inputText" rows="4" cols="50" placeholder="Enter text here..."></textarea>
+        <button class="clear-button" onclick="clearText()">×</button>
     </div>
-
     <div class="button-container">
-      <button class="btn" onclick="toggleConversion()" id="toggleButton">Alphabet → Runora</button>
-      <button class="btn" onclick="copyOutput()">Copy Converted Text</button>
+        <button onclick="toggleConversion()" id="toggleButton">Alphabet → Runora</button>
+        <button onclick="copyOutput()">Copy Converted Text</button>
     </div>
-
     <h2>Converted Text:</h2>
     <p id="outputText"></p>
-
     <div class="history">
-      <h3>
-        Conversion History
-        <button class="clear-history-button" onclick="clearHistory()">Clear History</button>
-      </h3>
-      <div id="historyList"></div>
+        <h3>
+            Conversion History
+            <button class="clear-history-button" onclick="clearHistory()">Clear History</button>
+        </h3>
+        <div id="historyList"></div>
     </div>
-  </div>
+</div>
+<script>
+const symbolMap = {
+    'A': '∣','B': '‒','C': 'ˁ','D': '●','E': '⋋','F': '⋌','G': '≺','H': '⋏','I': '≖','J': '≻','K': '⊼','L': '∦','M': '⋂','N': '⋃','O': '∅','P': '∸','Q': '∀','R': '∈','S': '∼','T': 'T','U': '∃','V': '⋎','W': 'w','X': 'X','Y': 'Y','Z': 'Ω'
+};
+const reverseSymbolMap = {};
+for (const [key, value] of Object.entries(symbolMap)) reverseSymbolMap[value] = key;
+reverseSymbolMap['ω'] = 'W';
+reverseSymbolMap['Ω'] = 'Z';
+let conversionType = 'alphabetToSymbol';
+let history = [];
+let lastInput = '';
 
-  <script>
-    /* ===== original conversion logic (unchanged) ===== */
-    const symbolMap = {
-      'A': '∣','B': '‒','C': 'ˁ','D': '●','E': '⋋','F': '⋌','G': '≺','H': '⋏','I': '≖','J': '≻','K': '⊼','L': '∦','M': '⋂','N': '⋃','O': '∅','P': '∸','Q': '∀','R': '∈','S': '∼','T': 'T','U': '∃','V': '⋎','W': 'w','X': 'X','Y': 'Y','Z': 'Ω'
-    };
-    const reverseSymbolMap = {};
-    for (const [key, value] of Object.entries(symbolMap)) reverseSymbolMap[value] = key;
-    reverseSymbolMap['ω'] = 'W';
-    reverseSymbolMap['Ω'] = 'Z';
-    let conversionType = 'alphabetToSymbol';
-    let history = [];
-    let lastInput = '';
+function toggleConversion() {
+    conversionType = conversionType === 'alphabetToSymbol' ? 'symbolToAlphabet' : 'alphabetToSymbol';
+    document.getElementById('toggleButton').textContent = conversionType === 'alphabetToSymbol' ? 'Alphabet → Runora' : 'Runora → Alphabet';
+    convertText();
+}
 
-    function toggleConversion() {
-      conversionType = conversionType === 'alphabetToSymbol' ? 'symbolToAlphabet' : 'alphabetToSymbol';
-      document.getElementById('toggleButton').textContent = conversionType === 'alphabetToSymbol' ? 'Alphabet → Runora' : 'Runora → Alphabet';
-      convertText();
-    }
-
-    function convertText() {
-      const inputText = document.getElementById('inputText').value.toUpperCase();
-      let outputText = '';
-      if (conversionType === 'alphabetToSymbol') {
+function convertText() {
+    const inputText = document.getElementById('inputText').value.toUpperCase();
+    let outputText = '';
+    if (conversionType === 'alphabetToSymbol') {
         for (let char of inputText) outputText += symbolMap[char] || char;
-      } else {
+    } else {
         for (let char of inputText) outputText += reverseSymbolMap[char] || char;
-      }
-      const outEl = document.getElementById('outputText');
-      outEl.innerText = outputText;
-      // show output visually (ensure visible)
-      outEl.style.opacity = outputText ? '1' : '0';
-      if (inputText.trim() && inputText !== lastInput) {
+    }
+    document.getElementById('outputText').innerText = outputText;
+    if (inputText.trim() && inputText !== lastInput) {
         history.push({ input: inputText, output: outputText });
         lastInput = inputText;
         updateHistory();
-      }
     }
+}
 
-    function updateHistory() {
-      const historyList = document.getElementById('historyList');
-      historyList.innerHTML = history.slice(-5).map(item => {
-        // ensure safe quoting for onclick
-        const safeInput = item.input.replace(/'/g, "\\'");
-        return `<div class="history-item" onclick="useHistoryItem('${safeInput}')"><strong>${item.input}</strong> → ${item.output}</div>`;
-      }).join('');
-    }
+function updateHistory() {
+    const historyList = document.getElementById('historyList');
+    historyList.innerHTML = history.slice(-5).map(item => `<div class="history-item" onclick="useHistoryItem('${item.input}')"><strong>${item.input}</strong> → ${item.output}</div>`).join('');
+}
 
-    function useHistoryItem(input) {
-      document.getElementById('inputText').value = input;
-      convertText();
-    }
+function useHistoryItem(input) {
+    document.getElementById('inputText').value = input;
+    convertText();
+}
 
-    function copyOutput() {
-      const outputText = document.getElementById('outputText').innerText;
-      if (outputText) navigator.clipboard.writeText(outputText).then(() => alert('Converted text copied to clipboard!')).catch(() => alert('Failed to copy text.'));
-      else alert('No converted text to copy.');
-    }
+function copyOutput() {
+    const outputText = document.getElementById('outputText').innerText;
+    if (outputText) navigator.clipboard.writeText(outputText).then(() => alert('Converted text copied to clipboard!')).catch(() => alert('Failed to copy text.'));
+    else alert('No converted text to copy.');
+}
 
-    function clearText() {
-      document.getElementById('inputText').value = '';
-      document.getElementById('outputText').innerText = '';
-      document.getElementById('outputText').style.opacity = '0';
-    }
+function clearText() {
+    document.getElementById('inputText').value = '';
+    document.getElementById('outputText').innerText = '';
+}
 
-    function clearHistory() {
-      history = [];
-      lastInput = '';
-      updateHistory();
-    }
+function clearHistory() {
+    history = [];
+    lastInput = '';
+    updateHistory();
+}
 
-    function toggleTheme() {
-      const body = document.body;
-      const themeToggle = document.querySelector('.theme-toggle');
-      if (body.classList.contains('dark')) {
+function toggleTheme() {
+    const body = document.body;
+    const themeToggle = document.querySelector('.theme-toggle');
+    if (body.classList.contains('dark')) {
         body.classList.remove('dark');
         themeToggle.textContent = '☀️';
-      } else {
+    } else {
         body.classList.add('dark');
         themeToggle.textContent = '🌙';
-      }
-      themeToggle.classList.add('rotate');
-      setTimeout(() => themeToggle.classList.remove('rotate'), 500);
-      localStorage.setItem('theme', body.classList.contains('dark') ? 'dark' : 'light');
     }
+    themeToggle.classList.add('rotate');
+    setTimeout(() => themeToggle.classList.remove('rotate'), 500);
+    localStorage.setItem('theme', body.classList.contains('dark') ? 'dark' : 'light');
+}
 
-    function loadTheme() {
-      const savedTheme = localStorage.getItem('theme');
-      const themeToggle = document.querySelector('.theme-toggle');
-      if (savedTheme === 'dark') {
+function loadTheme() {
+    const savedTheme = localStorage.getItem('theme');
+    const themeToggle = document.querySelector('.theme-toggle');
+    if (savedTheme === 'dark') {
         document.body.classList.add('dark');
         themeToggle.textContent = '🌙';
-      } else {
+    } else {
         document.body.classList.remove('dark');
         themeToggle.textContent = '☀️';
-      }
     }
+}
 
-    window.onload = function () {
-      loadTheme();
-      document.getElementById('mainContent').style.display = 'flex';
-      document.getElementById('inputText').addEventListener('input', convertText);
-    };
-  </script>
+window.onload = function () {
+    loadTheme();
+    document.getElementById('mainContent').style.display = 'flex';
+    document.getElementById('inputText').addEventListener('input', convertText);
+};
+</script>
 </body>
 </html>
