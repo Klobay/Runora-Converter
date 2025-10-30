@@ -8,13 +8,6 @@
 
 A sleek, real-time web application to convert text between the standard alphabet and the fictional Runora script. Built with vanilla JavaScript, HTML5, and modern CSS.
 
-> [!NOTE]
-> *A live demo of this project can be hosted at: [your-live-demo-url.com](https://your-live-demo-url.com)*
-
-(We recommend adding a screenshot or GIF of the converter in action here!)
-
-`![Runora Converter in Action](demo.gif)`
-
 ---
 
 ## ✨ Features
