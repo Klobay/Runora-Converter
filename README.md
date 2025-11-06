@@ -7,6 +7,7 @@
 ![Status: Maintained](https://img.shields.io/badge/status-maintained-success)
 
 A sleek, real-time web application to convert text between the standard alphabet and the fictional Runora script. Built with vanilla JavaScript, HTML5, and modern CSS.
+https://klobay.github.io/Runora-Converter/
 
 ---
 
