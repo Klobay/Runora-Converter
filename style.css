@@ -1,0 +1,381 @@
+
+body {
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    flex-direction: column;
+    background: linear-gradient(to right, #83a4d4, #b6fbff);
+    color: #333;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    position: relative;
+}
+
+/* Dark Mode Styles */
+body.dark {
+    background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
+    color: #f4f4f9;
+}
+body.dark textarea,
+body.dark #outputText,
+body.dark .history {
+    background-color: rgba(0, 0, 0, 0.2);
+    color: #f4f4f9;
+    border-color: rgba(255, 255, 255, 0.2);
+}
+body.dark .history-item:hover {
+    background-color: rgba(0, 0, 0, 0.4);
+}
+body.dark .clear-button {
+    background-color: #666;
+    color: #f4f4f9;
+}
+body.dark button {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #f4f4f9;
+}
+body.dark .history h3 {
+    color: #bb86fc;
+}
+
+/* Gradient Transition Overlay */
+.gradient-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to bottom, #333, #444);
+    z-index: -1;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    clip-path: circle(0% at 95% 5%);
+}
+body.dark .gradient-overlay {
+    opacity: 1;
+    clip-path: circle(150% at 95% 5%);
+}
+
+/* Container for centering */
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 500px; /* Slightly wider for desktop */
+    z-index: 1;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 15px;
+    padding: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Title Styles */
+h1 {
+    margin: 5px 0; /* Moved further up */
+    font-size: clamp(2rem, 8vw, 3.5rem); /* Dynamically scales for mobile and desktop */
+    font-family: 'Rubik', sans-serif;
+    font-weight: 400;
+    text-align: center;
+    animation: colorChange 5s infinite;
+    white-space: nowrap; /* Ensure it stays in one line */
+    overflow: hidden; /* Prevent wrapping */
+    text-overflow: ellipsis; /* Add ellipsis if text overflows */
+    width: 100%; /* Ensure it takes full width */
+}
+
+/* Usage Instructions */
+.instructions {
+    text-align: center;
+    margin: 0 20px 20px;
+    font-size: 1rem;
+    color: #666;
+    max-width: 500px;
+}
+
+/* Textarea Container */
+.textarea-container {
+    position: relative;
+    margin-bottom: 20px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Textarea Styles */
+textarea {
+    width: 100%;
+    height: 100px;
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 8px;
+    resize: none;
+    transition: border-color 0.3s ease, background-color 0.3s ease, color 0.3s ease;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #333;
+}
+
+/* Clear Button Styles */
+.clear-button {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    background-color: #ccc;
+    color: #333;
+    border: none;
+    padding: 5px;
+    font-size: 14px;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color 0.3s ease, opacity 0.3s ease;
+    opacity: 0.7;
+}
+.clear-button:hover {
+    background-color: #bbb;
+    opacity: 1;
+}
+
+/* Button Container */
+.button-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+}
+
+/* Button Styles */
+button {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #333;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    width: 100%;
+    max-width: 200px;
+}
+button:hover {
+    opacity: 0.9;
+    transform: scale(1.05);
+}
+
+/* Output Text Styles */
+#outputText {
+    margin-top: 20px;
+    padding: 10px;
+    width: 100%;
+    min-height: 50px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 8px;
+    font-size: 16px;
+    word-wrap: break-word;
+    transition: border-color 0.3s ease, background-color 0.3s ease, color 0.3s ease;
+    opacity: 0;
+    animation: fadeIn 0.5s ease forwards;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Converted Text Title */
+h2 {
+    margin-top: 20px;
+    text-align: center;
+    width: 100%;
+    max-width: 500px;
+    font-size: 1.5rem;
+    white-space: nowrap; /* Ensure it stays on one line */
+}
+
+/* Conversion History Styles */
+.history {
+    margin-top: 20px;
+    width: 100%;
+    max-height: 150px;
+    overflow-y: auto;
+    border-radius: 8px;
+    padding: 10px;
+    font-size: 14px;
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+.history h3 {
+    margin: 0 0 10px;
+    font-size: 16px;
+    color: #6200ea;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.history-item {
+    margin-bottom: 5px;
+    padding: 5px;
+    border-bottom: 1px solid #eee;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+.history-item:hover {
+    background-color: #f4f4f9;
+}
+
+/* Clear History Button */
+.clear-history-button {
+    background-color: #ff4444;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    font-size: 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+.clear-history-button:hover {
+    background-color: #cc0000;
+}
+
+/* Theme Toggle Button */
+.theme-toggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #333;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 10px;
+    font-size: 20px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 50px;
+    height: 50px;
+    transition: transform 0.5s ease, background-color 0.3s ease;
+    z-index: 2;
+}
+.theme-toggle.rotate {
+    animation: rotate 0.5s ease;
+}
+
+/* Login Modal Styles */
+.login-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    justify-content: center;
+    align-items: center;
+    z-index: 3;
+}
+.login-modal.show {
+    display: flex;
+}
+.login-box {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
+    max-width: 300px;
+    width: 90%;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+body.dark .login-box {
+    background-color: #444;
+    color: #f4f4f9;
+}
+.login-box input {
+    width: calc(100% - 20px);
+    padding: 10px;
+    margin: 10px 0;
+    border: 2px solid #6200ea;
+    border-radius: 8px;
+    font-size: 16px;
+}
+.login-box button {
+    width: 100%;
+    max-width: none;
+}
+.error-message {
+    color: #ff4444;
+    font-size: 14px;
+    margin-top: 10px;
+    display: none;
+}
+
+/* Admin Modal Styles */
+.admin-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    justify-content: center;
+    align-items: center;
+    z-index: 3;
+}
+.admin-modal.show {
+    display: flex;
+}
+.admin-box {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
+    max-width: 300px;
+    width: 90%;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+body.dark .admin-box {
+    background-color: #444;
+    color: #f4f4f9;
+}
+.admin-box input {
+    width: calc(100% - 20px);
+    padding: 10px;
+    margin: 10px 0;
+    border: 2px solid #6200ea;
+    border-radius: 8px;
+    font-size: 16px;
+}
+.admin-box button {
+    width: 100%;
+    max-width: none;
+}
+
+/* Keyframes for animations */
+@keyframes colorChange {
+    0% { color: #6200ea; }
+    25% { color: #bb86fc; }
+    50% { color: #03dac6; }
+    75% { color: #ff0266; }
+    100% { color: #6200ea; }
+}
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+@keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
