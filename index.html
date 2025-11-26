@@ -4,499 +4,820 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Runora Converter</title>
-<link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Rubik&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-    /* Base Styles */
-    body {
-        font-family: 'Arial', sans-serif;
+    * {
         margin: 0;
-        padding: 20px;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Inter', sans-serif;
+        min-height: 100vh;
         display: flex;
         justify-content: center;
         align-items: center;
-        min-height: 100vh;
-        flex-direction: column;
-        background-color: #f4f4f9;
-        color: #333;
-        transition: background-color 0.3s ease, color 0.3s ease;
+        padding: 20px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        position: relative;
+        overflow-x: hidden;
+        transition: background 0.5s ease;
+    }
+
+    body::before {
+        content: '';
+        position: absolute;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.3), transparent 50%),
+                    radial-gradient(circle at 80% 80%, rgba(138, 43, 226, 0.3), transparent 50%),
+                    radial-gradient(circle at 40% 20%, rgba(72, 61, 139, 0.3), transparent 50%);
+        animation: gradientShift 20s ease infinite;
+        pointer-events: none;
+    }
+
+    @keyframes gradientShift {
+        0%, 100% { transform: translate(0, 0) rotate(0deg); }
+        50% { transform: translate(-50px, -50px) rotate(180deg); }
+    }
+
+    body.dark {
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    }
+
+    body.dark::before {
+        background: radial-gradient(circle at 20% 50%, rgba(30, 30, 60, 0.5), transparent 50%),
+                    radial-gradient(circle at 80% 80%, rgba(50, 20, 80, 0.5), transparent 50%);
+    }
+
+    .container {
+        width: 100%;
+        max-width: 650px;
+        z-index: 1;
+        animation: fadeInUp 0.8s ease;
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .card {
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(40px) saturate(180%);
+        -webkit-backdrop-filter: blur(40px) saturate(180%);
+        border-radius: 24px;
+        padding: 40px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15), 
+                    0 0 0 1px rgba(255, 255, 255, 0.3) inset;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        transition: all 0.3s ease;
+    }
+
+    body.dark .card {
+        background: rgba(30, 30, 46, 0.6);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4),
+                    0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    h1 {
+        font-size: clamp(2.5rem, 8vw, 4rem);
+        font-weight: 700;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        text-align: center;
+        margin-bottom: 12px;
+        letter-spacing: -1px;
+        animation: shimmer 3s ease-in-out infinite;
+    }
+
+    @keyframes shimmer {
+        0%, 100% { filter: brightness(1); }
+        50% { filter: brightness(1.2); }
+    }
+
+    body.dark h1 {
+        background: linear-gradient(135deg, #a78bfa 0%, #ec4899 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .subtitle {
+        text-align: center;
+        color: #64748b;
+        font-size: 1rem;
+        margin-bottom: 32px;
+        line-height: 1.6;
+    }
+
+    body.dark .subtitle {
+        color: #94a3b8;
+    }
+
+    .mode-toggle {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 24px;
+        background: #f1f5f9;
+        padding: 6px;
+        border-radius: 12px;
         position: relative;
     }
 
-    /* Dark Mode Styles */
-    body.dark {
-        background-color: #333;
-        color: #f4f4f9;
-    }
-    body.dark textarea,
-    body.dark #outputText,
-    body.dark .history {
-        background-color: #444;
-        color: #f4f4f9;
-        border-color: #bb86fc;
-    }
-    body.dark .history-item:hover {
-        background-color: #555;
-    }
-    body.dark .clear-button {
-        background-color: #666;
-        color: #f4f4f9;
-    }
-    body.dark button {
-        background-color: #bb86fc;
-        color: #333;
-    }
-    body.dark .history h3 {
-        color: #bb86fc;
+    body.dark .mode-toggle {
+        background: #1e293b;
     }
 
-    /* Gradient Transition Overlay */
-    .gradient-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(to bottom, #333, #444);
-        z-index: -1;
-        opacity: 0;
-        transition: opacity 0.5s ease;
-        clip-path: circle(0% at 95% 5%);
-    }
-    body.dark .gradient-overlay {
-        opacity: 1;
-        clip-path: circle(150% at 95% 5%);
-    }
-
-    /* Container for centering */
-    .container {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        width: 100%;
-        max-width: 500px; /* Slightly wider for desktop */
+    .mode-btn {
+        flex: 1;
+        padding: 12px 20px;
+        border: none;
+        background: transparent;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        color: #64748b;
+        position: relative;
         z-index: 1;
     }
 
-    /* Title Styles */
-    h1 {
-        margin: 5px 0; /* Moved further up */
-        font-size: clamp(2rem, 8vw, 3.5rem); /* Dynamically scales for mobile and desktop */
-        font-family: 'Rubik', sans-serif;
-        font-weight: 400;
-        text-align: center;
-        animation: colorChange 5s infinite;
-        white-space: nowrap; /* Ensure it stays in one line */
-        overflow: hidden; /* Prevent wrapping */
-        text-overflow: ellipsis; /* Add ellipsis if text overflows */
-        width: 100%; /* Ensure it takes full width */
+    .mode-btn.active {
+        color: white;
     }
 
-    /* Usage Instructions */
-    .instructions {
-        text-align: center;
-        margin: 0 20px 20px;
-        font-size: 1rem;
-        color: #666;
-        max-width: 500px;
+    .mode-indicator {
+        position: absolute;
+        top: 6px;
+        left: 6px;
+        width: calc(50% - 6px);
+        height: calc(100% - 12px);
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 8px;
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
     }
 
-    /* Textarea Container */
-    .textarea-container {
+    body.dark .mode-indicator {
+        background: linear-gradient(135deg, #a78bfa 0%, #ec4899 100%);
+    }
+
+    .mode-indicator.right {
+        transform: translateX(calc(100% + 6px));
+    }
+
+    .input-group {
         position: relative;
         margin-bottom: 20px;
-        width: 100%;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
     }
 
-    /* Textarea Styles */
+    .input-wrapper {
+        position: relative;
+    }
+
     textarea {
         width: 100%;
-        height: 100px;
-        padding: 10px;
+        min-height: 140px;
+        padding: 20px;
+        padding-right: 50px;
         font-size: 16px;
-        border: 2px solid #6200ea;
-        border-radius: 8px;
-        resize: none;
-        transition: border-color 0.3s ease, background-color 0.3s ease, color 0.3s ease;
+        font-family: 'JetBrains Mono', monospace;
+        border: 2px solid #e2e8f0;
+        border-radius: 16px;
+        background: #ffffff;
+        color: #1e293b;
+        resize: vertical;
+        transition: all 0.3s ease;
+        line-height: 1.6;
     }
 
-    /* Clear Button Styles */
-    .clear-button {
+    textarea:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+    }
+
+    body.dark textarea {
+        background: #0f172a;
+        border-color: #334155;
+        color: #e2e8f0;
+    }
+
+    body.dark textarea:focus {
+        border-color: #a78bfa;
+        box-shadow: 0 0 0 4px rgba(167, 139, 250, 0.1);
+    }
+
+    .char-count {
         position: absolute;
-        right: 10px;
-        top: 10px;
-        background-color: #ccc;
-        color: #333;
+        bottom: 12px;
+        right: 16px;
+        font-size: 12px;
+        color: #94a3b8;
+        font-weight: 500;
+        pointer-events: none;
+    }
+
+    .clear-btn {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        width: 32px;
+        height: 32px;
         border: none;
-        padding: 5px;
-        font-size: 14px;
-        border-radius: 50%;
-        width: 24px;
-        height: 24px;
+        background: #ef4444;
+        color: white;
+        border-radius: 8px;
+        cursor: pointer;
         display: flex;
         align-items: center;
         justify-content: center;
-        cursor: pointer;
-        transition: background-color 0.3s ease, opacity 0.3s ease;
-        opacity: 0.7;
+        font-size: 18px;
+        opacity: 0;
+        transition: all 0.3s ease;
+        pointer-events: none;
     }
-    .clear-button:hover {
-        background-color: #bbb;
+
+    .clear-btn.visible {
         opacity: 1;
+        pointer-events: all;
     }
 
-    /* Button Container */
-    .button-container {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 10px;
-        width: 100%;
+    .clear-btn:hover {
+        background: #dc2626;
+        transform: scale(1.1);
     }
 
-    /* Button Styles */
-    button {
-        background-color: #6200ea;
+    .output-section {
+        margin-top: 24px;
+        padding: 24px;
+        background: rgba(248, 250, 252, 0.5);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border-radius: 16px;
+        border: 2px dashed rgba(203, 213, 225, 0.6);
+        min-height: 120px;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    body.dark .output-section {
+        background: rgba(15, 23, 42, 0.4);
+        border-color: rgba(51, 65, 85, 0.6);
+    }
+
+    .output-label {
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: #94a3b8;
+        margin-bottom: 12px;
+    }
+
+    .output-text {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 18px;
+        color: #1e293b;
+        line-height: 1.8;
+        word-wrap: break-word;
+        min-height: 60px;
+    }
+
+    body.dark .output-text {
+        color: #e2e8f0;
+    }
+
+    .output-text.empty {
+        color: #cbd5e1;
+        font-style: italic;
+    }
+
+    body.dark .output-text.empty {
+        color: #475569;
+    }
+
+    .copy-btn {
+        position: absolute;
+        top: 16px;
+        right: 16px;
+        padding: 8px 16px;
+        background: #667eea;
         color: white;
         border: none;
-        padding: 10px 20px;
-        font-size: 16px;
         border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
         cursor: pointer;
-        transition: background-color 0.3s ease, transform 0.2s ease;
-        width: 100%;
-        max-width: 200px;
-    }
-    button:hover {
-        opacity: 0.9;
-        transform: scale(1.05);
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 6px;
     }
 
-    /* Output Text Styles */
-    #outputText {
-        margin-top: 20px;
-        padding: 10px;
-        width: 100%;
-        min-height: 50px;
-        background-color: #fff;
-        border: 2px solid #6200ea;
-        border-radius: 8px;
-        font-size: 16px;
-        word-wrap: break-word;
-        transition: border-color 0.3s ease, background-color 0.3s ease, color 0.3s ease;
-        opacity: 0;
-        animation: fadeIn 0.5s ease forwards;
+    .copy-btn:hover {
+        background: #5568d3;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
     }
 
-    /* Converted Text Title */
-    h2 {
-        margin-top: 20px;
-        text-align: center;
-        width: 100%;
-        max-width: 500px;
-        font-size: 1.5rem;
-        white-space: nowrap; /* Ensure it stays on one line */
+    .copy-btn.copied {
+        background: #10b981;
     }
 
-    /* Conversion History Styles */
-    .history {
-        margin-top: 20px;
-        width: 100%;
-        max-height: 150px;
+    .history-section {
+        margin-top: 24px;
+        padding: 20px;
+        background: rgba(248, 250, 252, 0.5);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border-radius: 16px;
+        border: 1px solid rgba(226, 232, 240, 0.6);
+        max-height: 200px;
         overflow-y: auto;
-        border: 2px solid #6200ea;
-        border-radius: 8px;
-        padding: 10px;
-        background-color: #fff;
-        font-size: 14px;
-        transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+        transition: all 0.3s ease;
     }
-    .history h3 {
-        margin: 0 0 10px;
-        font-size: 16px;
-        color: #6200ea;
+
+    body.dark .history-section {
+        background: rgba(15, 23, 42, 0.4);
+        border: 1px solid rgba(51, 65, 85, 0.6);
+    }
+
+    .history-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
-    }
-    .history-item {
-        margin-bottom: 5px;
-        padding: 5px;
-        border-bottom: 1px solid #eee;
-        cursor: pointer;
-        transition: background-color 0.3s ease;
-    }
-    .history-item:hover {
-        background-color: #f4f4f9;
+        margin-bottom: 16px;
     }
 
-    /* Clear History Button */
-    .clear-history-button {
-        background-color: #ff4444;
-        color: white;
-        border: none;
-        padding: 5px 10px;
+    .history-title {
+        font-size: 14px;
+        font-weight: 600;
+        color: #475569;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    body.dark .history-title {
+        color: #94a3b8;
+    }
+
+    .clear-history-btn {
+        padding: 6px 12px;
+        background: transparent;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
         font-size: 12px;
-        border-radius: 5px;
+        font-weight: 500;
+        color: #64748b;
         cursor: pointer;
-        transition: background-color 0.3s ease;
-    }
-    .clear-history-button:hover {
-        background-color: #cc0000;
+        transition: all 0.3s ease;
     }
 
-    /* Theme Toggle Button */
+    .clear-history-btn:hover {
+        background: #fee2e2;
+        border-color: #fecaca;
+        color: #ef4444;
+    }
+
+    body.dark .clear-history-btn {
+        border-color: #334155;
+        color: #94a3b8;
+    }
+
+    body.dark .clear-history-btn:hover {
+        background: rgba(239, 68, 68, 0.1);
+        border-color: #ef4444;
+        color: #ef4444;
+    }
+
+    .history-item {
+        padding: 12px;
+        background: rgba(255, 255, 255, 0.6);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border-radius: 8px;
+        margin-bottom: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: 1px solid rgba(226, 232, 240, 0.6);
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 13px;
+    }
+
+    .history-item:hover {
+        border-color: #667eea;
+        transform: translateX(4px);
+        box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
+        background: rgba(255, 255, 255, 0.8);
+    }
+
+    body.dark .history-item {
+        background: rgba(30, 41, 59, 0.5);
+        border-color: rgba(51, 65, 85, 0.6);
+    }
+
+    body.dark .history-item:hover {
+        border-color: #a78bfa;
+        box-shadow: 0 2px 8px rgba(167, 139, 250, 0.2);
+        background: rgba(30, 41, 59, 0.7);
+    }
+
+    .history-item-input {
+        color: #64748b;
+        font-weight: 500;
+    }
+
+    .history-item-arrow {
+        color: #cbd5e1;
+        margin: 0 8px;
+    }
+
+    .history-item-output {
+        color: #1e293b;
+    }
+
+    body.dark .history-item-output {
+        color: #e2e8f0;
+    }
+
+    .history-empty {
+        text-align: center;
+        color: #cbd5e1;
+        font-size: 14px;
+        font-style: italic;
+        padding: 20px;
+    }
+
+    body.dark .history-empty {
+        color: #475569;
+    }
+
     .theme-toggle {
         position: fixed;
-        top: 20px;
-        right: 20px;
-        background-color: #6200ea;
-        color: white;
+        top: 24px;
+        right: 24px;
+        width: 56px;
+        height: 56px;
         border: none;
-        padding: 10px;
-        font-size: 20px;
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(20px) saturate(180%);
+        -webkit-backdrop-filter: blur(20px) saturate(180%);
+        border: 1px solid rgba(255, 255, 255, 0.3);
         border-radius: 50%;
         cursor: pointer;
         display: flex;
         align-items: center;
         justify-content: center;
-        width: 50px;
-        height: 50px;
-        transition: transform 0.5s ease, background-color 0.3s ease;
-        z-index: 2;
-    }
-    .theme-toggle.rotate {
-        animation: rotate 0.5s ease;
-    }
-
-    /* Login Modal Styles */
-    .login-modal {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.5);
-        justify-content: center;
-        align-items: center;
-        z-index: 3;
-    }
-    .login-modal.show {
-        display: flex;
-    }
-    .login-box {
-        background-color: #fff;
-        padding: 20px;
-        border-radius: 8px;
-        text-align: center;
-        max-width: 300px;
-        width: 90%;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    }
-    body.dark .login-box {
-        background-color: #444;
-        color: #f4f4f9;
-    }
-    .login-box input {
-        width: calc(100% - 20px);
-        padding: 10px;
-        margin: 10px 0;
-        border: 2px solid #6200ea;
-        border-radius: 8px;
-        font-size: 16px;
-    }
-    .login-box button {
-        width: 100%;
-        max-width: none;
-    }
-    .error-message {
-        color: #ff4444;
         font-size: 14px;
-        margin-top: 10px;
-        display: none;
+        font-weight: 600;
+        color: #475569;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+        z-index: 100;
     }
 
-    /* Admin Modal Styles */
-    .admin-modal {
-        display: none;
+    .theme-toggle:hover {
+        transform: scale(1.1);
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
+    }
+
+    body.dark .theme-toggle {
+        background: rgba(30, 30, 46, 0.7);
+        color: #e2e8f0;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .toast {
         position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.5);
-        justify-content: center;
-        align-items: center;
-        z-index: 3;
-    }
-    .admin-modal.show {
-        display: flex;
-    }
-    .admin-box {
-        background-color: #fff;
-        padding: 20px;
-        border-radius: 8px;
-        text-align: center;
-        max-width: 300px;
-        width: 90%;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    }
-    body.dark .admin-box {
-        background-color: #444;
-        color: #f4f4f9;
-    }
-    .admin-box input {
-        width: calc(100% - 20px);
-        padding: 10px;
-        margin: 10px 0;
-        border: 2px solid #6200ea;
-        border-radius: 8px;
-        font-size: 16px;
-    }
-    .admin-box button {
-        width: 100%;
-        max-width: none;
+        bottom: 24px;
+        left: 50%;
+        transform: translateX(-50%) translateY(100px);
+        padding: 16px 24px;
+        background: #1e293b;
+        color: white;
+        border-radius: 12px;
+        font-size: 14px;
+        font-weight: 500;
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+        z-index: 1000;
+        opacity: 0;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        pointer-events: none;
     }
 
-    /* Keyframes for animations */
-    @keyframes colorChange {
-        0% { color: #6200ea; }
-        25% { color: #bb86fc; }
-        50% { color: #03dac6; }
-        75% { color: #ff0266; }
-        100% { color: #6200ea; }
+    .toast.show {
+        transform: translateX(-50%) translateY(0);
+        opacity: 1;
     }
-    @keyframes fadeIn {
-        from { opacity: 0; }
-        to { opacity: 1; }
+
+    body.dark .toast {
+        background: #f8fafc;
+        color: #1e293b;
     }
-    @keyframes rotate {
-        from { transform: rotate(0deg); }
-        to { transform: rotate(360deg); }
+
+    /* Scrollbar styling */
+    ::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: #f1f5f9;
+        border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8;
+    }
+
+    body.dark ::-webkit-scrollbar-track {
+        background: #1e293b;
+    }
+
+    body.dark ::-webkit-scrollbar-thumb {
+        background: #475569;
+    }
+
+    body.dark ::-webkit-scrollbar-thumb:hover {
+        background: #64748b;
+    }
+
+    @media (max-width: 640px) {
+        .card {
+            padding: 24px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+        }
+
+        .theme-toggle {
+            width: 48px;
+            height: 48px;
+            top: 16px;
+            right: 16px;
+        }
     }
 </style>
 </head>
 <body>
-<div class="gradient-overlay"></div>
-<button class="theme-toggle" onclick="toggleTheme()">🌙</button>
-<div class="container" id="mainContent">
-    <h1>Runora Converter</h1>
-    <p class="instructions">
-        Convert text between the alphabet and Runora in real-time! Simply type in the box below, and the conversion will happen automatically. Use the buttons to switch conversion modes or copy the result.
-    </p>
-    <div class="textarea-container">
-        <textarea id="inputText" rows="4" cols="50" placeholder="Enter text here..."></textarea>
-        <button class="clear-button" onclick="clearText()">×</button>
-    </div>
-    <div class="button-container">
-        <button onclick="toggleConversion()" id="toggleButton">Alphabet → Runora</button>
-        <button onclick="copyOutput()">Copy Converted Text</button>
-    </div>
-    <h2>Converted Text:</h2>
-    <p id="outputText"></p>
-    <div class="history">
-        <h3>
-            Conversion History
-            <button class="clear-history-button" onclick="clearHistory()">Clear History</button>
-        </h3>
-        <div id="historyList"></div>
+<button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">Dark</button>
+
+<div class="container">
+    <div class="card">
+        <h1>Runora</h1>
+        <p class="subtitle">Transform text between alphabet and mystical Runora symbols instantly</p>
+
+        <div class="mode-toggle">
+            <div class="mode-indicator" id="modeIndicator"></div>
+            <button class="mode-btn active" onclick="setMode('toRunora')">Alphabet → Runora</button>
+            <button class="mode-btn" onclick="setMode('toAlphabet')">Runora → Alphabet</button>
+        </div>
+
+        <div class="input-group">
+            <div class="input-wrapper">
+                <textarea id="inputText" placeholder="Start typing..." oninput="handleInput()"></textarea>
+                <button class="clear-btn" id="clearBtn" onclick="clearInput()">×</button>
+            </div>
+        </div>
+
+        <div class="output-section">
+            <div class="output-label">Converted Output</div>
+            <div class="output-text empty" id="outputText">Your converted text will appear here...</div>
+            <button class="copy-btn" id="copyBtn" onclick="copyOutput()">
+                <span id="copyText">Copy</span>
+            </button>
+        </div>
+
+        <div class="history-section">
+            <div class="history-header">
+                <div class="history-title">Recent Conversions</div>
+                <button class="clear-history-btn" onclick="clearHistory()">Clear All</button>
+            </div>
+            <div id="historyList">
+                <div class="history-empty">No conversions yet</div>
+            </div>
+        </div>
     </div>
 </div>
+
+<div class="toast" id="toast"></div>
+
 <script>
 const symbolMap = {
-    'A': '∣','B': '‒','C': 'ˁ','D': '●','E': '⋋','F': '⋌','G': '≺','H': '⋏','I': '≖','J': '≻','K': '⊼','L': '∦','M': '⋂','N': '⋃','O': '∅','P': '∸','Q': '∀','R': '∈','S': '∼','T': 'T','U': '∃','V': '⋎','W': 'w','X': 'X','Y': 'Y','Z': 'Ω'
+    'A': '∣','B': '‒','C': 'ˁ','D': '●','E': '⋋','F': '⋌','G': '≺','H': '⋏','I': '≖','J': '≻',
+    'K': '⊼','L': '∦','M': '⋂','N': '⋃','O': '∅','P': '∸','Q': '∀','R': '∈','S': '∼','T': 'T',
+    'U': '∃','V': '⋎','W': 'w','X': 'X','Y': 'Y','Z': 'Ω'
 };
+
 const reverseSymbolMap = {};
-for (const [key, value] of Object.entries(symbolMap)) reverseSymbolMap[value] = key;
+for (const [key, value] of Object.entries(symbolMap)) {
+    reverseSymbolMap[value] = key;
+}
 reverseSymbolMap['ω'] = 'W';
 reverseSymbolMap['Ω'] = 'Z';
-let conversionType = 'alphabetToSymbol';
-let history = [];
-let lastInput = '';
 
-function toggleConversion() {
-    conversionType = conversionType === 'alphabetToSymbol' ? 'symbolToAlphabet' : 'alphabetToSymbol';
-    document.getElementById('toggleButton').textContent = conversionType === 'alphabetToSymbol' ? 'Alphabet → Runora' : 'Runora → Alphabet';
+let currentMode = 'toRunora';
+let history = [];
+
+function setMode(mode) {
+    currentMode = mode;
+    const indicator = document.getElementById('modeIndicator');
+    const buttons = document.querySelectorAll('.mode-btn');
+    
+    if (mode === 'toRunora') {
+        indicator.classList.remove('right');
+        buttons[0].classList.add('active');
+        buttons[1].classList.remove('active');
+    } else {
+        indicator.classList.add('right');
+        buttons[0].classList.remove('active');
+        buttons[1].classList.add('active');
+    }
+    
+    convertText();
+}
+
+function handleInput() {
+    const input = document.getElementById('inputText').value;
+    const clearBtn = document.getElementById('clearBtn');
+    
+    if (input.length > 0) {
+        clearBtn.classList.add('visible');
+    } else {
+        clearBtn.classList.remove('visible');
+    }
+    
     convertText();
 }
 
 function convertText() {
-    const inputText = document.getElementById('inputText').value.toUpperCase();
-    let outputText = '';
-    if (conversionType === 'alphabetToSymbol') {
-        for (let char of inputText) outputText += symbolMap[char] || char;
+    const input = document.getElementById('inputText').value;
+    const outputEl = document.getElementById('outputText');
+    
+    if (!input.trim()) {
+        outputEl.textContent = 'Your converted text will appear here...';
+        outputEl.classList.add('empty');
+        return;
+    }
+    
+    outputEl.classList.remove('empty');
+    let output = '';
+    const upperInput = input.toUpperCase();
+    
+    if (currentMode === 'toRunora') {
+        for (let char of upperInput) {
+            output += symbolMap[char] || char;
+        }
     } else {
-        for (let char of inputText) outputText += reverseSymbolMap[char] || char;
+        for (let char of upperInput) {
+            output += reverseSymbolMap[char] || char;
+        }
     }
-    document.getElementById('outputText').innerText = outputText;
-    if (inputText.trim() && inputText !== lastInput) {
-        history.push({ input: inputText, output: outputText });
-        lastInput = inputText;
-        updateHistory();
-    }
+    
+    outputEl.textContent = output;
 }
 
-function updateHistory() {
+function addToHistory(input, output) {
+    // Check if this exact conversion already exists
+    const exists = history.some(item => item.input === input && item.output === output);
+    if (exists) return;
+    
+    history.unshift({ input, output });
+    if (history.length > 5) {
+        history = history.slice(0, 5);
+    }
+    
+    updateHistoryDisplay();
+}
+
+function updateHistoryDisplay() {
     const historyList = document.getElementById('historyList');
-    historyList.innerHTML = history.slice(-5).map(item => `<div class="history-item" onclick="useHistoryItem('${item.input}')"><strong>${item.input}</strong> → ${item.output}</div>`).join('');
+    
+    if (history.length === 0) {
+        historyList.innerHTML = '<div class="history-empty">No conversions yet</div>';
+        return;
+    }
+    
+    historyList.innerHTML = history.map(item => `
+        <div class="history-item" onclick="useHistoryItem('${item.input.replace(/'/g, "\\'")}')">
+            <span class="history-item-input">${escapeHtml(item.input.substring(0, 20))}${item.input.length > 20 ? '...' : ''}</span>
+            <span class="history-item-arrow">→</span>
+            <span class="history-item-output">${escapeHtml(item.output.substring(0, 20))}${item.output.length > 20 ? '...' : ''}</span>
+        </div>
+    `).join('');
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
 }
 
 function useHistoryItem(input) {
     document.getElementById('inputText').value = input;
-    convertText();
+    handleInput();
 }
 
-function copyOutput() {
-    const outputText = document.getElementById('outputText').innerText;
-    if (outputText) navigator.clipboard.writeText(outputText).then(() => alert('Converted text copied to clipboard!')).catch(() => alert('Failed to copy text.'));
-    else alert('No converted text to copy.');
-}
-
-function clearText() {
+function clearInput() {
+    const input = document.getElementById('inputText').value;
+    const output = document.getElementById('outputText').textContent;
+    
+    // Add to history before clearing if there's content
+    if (input.trim() && output && output !== 'Your converted text will appear here...') {
+        addToHistory(input, output);
+    }
+    
     document.getElementById('inputText').value = '';
-    document.getElementById('outputText').innerText = '';
+    document.getElementById('outputText').textContent = 'Your converted text will appear here...';
+    document.getElementById('outputText').classList.add('empty');
+    document.getElementById('clearBtn').classList.remove('visible');
 }
 
 function clearHistory() {
     history = [];
-    lastInput = '';
-    updateHistory();
+    updateHistoryDisplay();
+    showToast('History cleared');
+}
+
+function copyOutput() {
+    const output = document.getElementById('outputText').textContent;
+    
+    if (output === 'Your converted text will appear here...') {
+        showToast('Nothing to copy yet');
+        return;
+    }
+    
+    navigator.clipboard.writeText(output).then(() => {
+        const copyBtn = document.getElementById('copyBtn');
+        const copyText = document.getElementById('copyText');
+        
+        copyBtn.classList.add('copied');
+        copyText.textContent = 'Copied!';
+        showToast('Copied to clipboard!');
+        
+        setTimeout(() => {
+            copyBtn.classList.remove('copied');
+            copyText.textContent = 'Copy';
+        }, 2000);
+    }).catch(() => {
+        showToast('Failed to copy');
+    });
 }
 
 function toggleTheme() {
     const body = document.body;
-    const themeToggle = document.querySelector('.theme-toggle');
-    if (body.classList.contains('dark')) {
-        body.classList.remove('dark');
-        themeToggle.textContent = '☀️';
-    } else {
-        body.classList.add('dark');
-        themeToggle.textContent = '🌙';
-    }
-    themeToggle.classList.add('rotate');
-    setTimeout(() => themeToggle.classList.remove('rotate'), 500);
-    localStorage.setItem('theme', body.classList.contains('dark') ? 'dark' : 'light');
+    const toggle = document.querySelector('.theme-toggle');
+    
+    body.classList.toggle('dark');
+    toggle.textContent = body.classList.contains('dark') ? 'Light' : 'Dark';
+    
+    const theme = body.classList.contains('dark') ? 'dark' : 'light';
+    localStorage.setItem('theme', theme);
 }
 
 function loadTheme() {
     const savedTheme = localStorage.getItem('theme');
-    const themeToggle = document.querySelector('.theme-toggle');
+    const toggle = document.querySelector('.theme-toggle');
+    
     if (savedTheme === 'dark') {
         document.body.classList.add('dark');
-        themeToggle.textContent = '🌙';
+        toggle.textContent = 'Light';
     } else {
-        document.body.classList.remove('dark');
-        themeToggle.textContent = '☀️';
+        toggle.textContent = 'Dark';
     }
 }
 
-window.onload = function () {
+function showToast(message) {
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.classList.add('show');
+    
+    setTimeout(() => {
+        toast.classList.remove('show');
+    }, 2000);
+}
+
+window.onload = function() {
     loadTheme();
-    document.getElementById('mainContent').style.display = 'flex';
-    document.getElementById('inputText').addEventListener('input', convertText);
 };
 </script>
 </body>
